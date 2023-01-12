@@ -5,7 +5,9 @@ import humps
 
 from Man10ShopV3.data_class.ShopFunction import ShopFunction
 from Man10ShopV3.shop_functions.MoneyFunction import MoneyFunction
+from Man10ShopV3.shop_functions.PriceFunction import PriceFunction
 from Man10ShopV3.shop_functions.StorageFunction import StorageFunction
+from Man10ShopV3.shop_functions.TargetItemFunction import TargetItemFunction
 from utils.JsonTools import flatten_dict, unflatten_dict
 
 if TYPE_CHECKING:
@@ -24,6 +26,8 @@ class Shop(object):
 
         self.money_function: MoneyFunction = self.register_function("money", MoneyFunction())
         self.storage_function: StorageFunction = self.register_function("storage", StorageFunction())
+        self.price_function: PriceFunction = self.register_function("price", PriceFunction())
+        self.target_item_function: TargetItemFunction = self.register_function("target_item", TargetItemFunction())
 
     def get_export_data(self):
         return humps.camelize(self.data)
@@ -44,7 +48,10 @@ class Shop(object):
         data = flatten_dict(self.data)
         data[key] = value
         self.data = unflatten_dict(data)
-        self.api.main.mongo["man10shop_v3"]["shops"].update_one({"shopId": self.get_shop_id()}, {"$set": self.data})
+        result = self.api.main.mongo["man10shop_v3"]["shops"].update_one({"shopId": self.get_shop_id()}, {"$set": self.data})
+        if result.raw_result["ok"] != 1:
+            return False
+        return True
 
     # base variables
 

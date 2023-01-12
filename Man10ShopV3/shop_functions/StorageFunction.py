@@ -12,9 +12,18 @@ class StorageFunction(ShopFunction):
 
     def get_storage_size(self):
         return self.get("storage_size")
-    
+
     def get_item_count(self):
         return self.get("item_count")
+
+    def set_item_count(self, amount: int):
+        return self.set("item_count", amount)
+
+    def add_item_count(self, amount: int):
+        return self.set_item_count(self.get_item_count() + amount)
+
+    def remove_item_count(self, amount: int):
+        return self.set_item_count(self.get_item_count() - amount)
 
     # =========
 
@@ -28,13 +37,12 @@ class StorageFunction(ShopFunction):
 
     def is_allowed_to_use_shop(self, order: OrderRequest) -> bool:
         if self.shop.get_shop_type() == "SELL":
-            if order.amount + self.get_item_count()>= self.get_storage_size() and not self.shop.is_admin():
-                # 在庫いっぱい
+            if order.amount + self.get_item_count() >= self.get_storage_size() and not self.shop.is_admin():
+                order.player.warn_message("ショップの倉庫がいっぱいです")
                 return False
 
         if self.shop.get_shop_id() == "BUY":
             if order.amount > self.get_item_count() and not self.shop.is_admin():
-                # 在庫ありません
+                order.player.warn_message("在庫がありません")
                 return False
         return True
-

@@ -31,8 +31,8 @@ class Man10ShopV3:
         # self.instance = InstanceMethod(self)
 
         # self.api.create_shop("a", "ショップ", 1000, "BUY", False)
-        # shop = self.api.get_shop("c83bab75-9216-11ed-a3b6-803253476232")
-        # shop.money_function.set("account", 1000)
+        shop = self.api.get_shop("c83bab75-9216-11ed-a3b6-803253476232")
+        shop.money_function.set("account", 1000)
         # print(shop.money_function.get("account"))
 
         order = OrderRequest(self)
@@ -43,6 +43,6 @@ class Man10ShopV3:
         order.player.main = self
         order.player.endpoint = "man10"
 
-        print(order.player.take_money(10000))
+        print(order.player.send_message("hello"))
 
         # self.flask.run("0.0.0.0", self.config["hostPort"])

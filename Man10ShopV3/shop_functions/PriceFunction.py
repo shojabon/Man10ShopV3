@@ -2,11 +2,8 @@ from Man10ShopV3.data_class.OrderRequest import OrderRequest
 from Man10ShopV3.data_class.ShopFunction import ShopFunction
 
 
-class StorageFunction(ShopFunction):
+class PriceFunction(ShopFunction):
     allowed_shop_type = ["BUY", "SELL"]
-
-    # storage_size: max storage size
-    # item_count: item count in storage
 
     # variables
 
@@ -36,13 +33,13 @@ class StorageFunction(ShopFunction):
         if self.shop.get_shop_type() == "BUY":
             total_price = self.get_price() * order.amount
             if total_price < order.player.get_balance():
-                # 現金が不足しています
+                order.player.warn_message("現金が不足しています")
                 return False
 
         if self.shop.get_shop_type() == "SELL":
             total_price = self.get_price() * order.amount
             if total_price > self.shop.money_function.get_money() and not self.shop.is_admin():
-                # ショップの現金足りない
+                order.player.warn_message("ショップ残金不足してます")
                 return False
         return True
 

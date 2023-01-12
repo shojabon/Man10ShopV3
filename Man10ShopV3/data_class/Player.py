@@ -5,6 +5,8 @@ import requests
 
 from typing import TYPE_CHECKING
 
+from Man10ShopV3.data_class.ItemStack import ItemStack
+
 if TYPE_CHECKING:
     from Man10ShopV3 import Man10ShopV3
 
@@ -17,6 +19,8 @@ class Player(object):
     balance: int = 0
 
     endpoint: str = None
+
+    inventory: dict[str, ItemStack] = None
 
     def http_request(self, endpoint: str, path: str, method: str = "POST", payload: dict = None):
         try:
@@ -34,8 +38,8 @@ class Player(object):
         except Exception:
             return None
 
-    def send_message(self, endpoint, message):
-        return self.http_request(endpoint, "/chat/tell", "POST", {
+    def send_message(self, message):
+        return self.http_request(self.endpoint, "/chat/tell", "POST", {
             "message": message,
             "playerUuid": self.uuid
         })
