@@ -1,6 +1,8 @@
 class ItemStack(object):
     base64: str = None
+    base64_type: str = None
     md5: str = None
+    md5_type: str = None
     amount: int = 1
     name: str = None
     lore: list[str] = None

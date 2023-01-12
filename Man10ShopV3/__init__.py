@@ -43,6 +43,6 @@ class Man10ShopV3:
         order.player.main = self
         order.player.endpoint = "man10"
 
-        print(order.player.send_message("hello"))
+        # print(order.player.send_message("hello"))
 
         # self.flask.run("0.0.0.0", self.config["hostPort"])
