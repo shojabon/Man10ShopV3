@@ -38,8 +38,10 @@ class Man10ShopV3:
         player.uuid = "ffa9b4cb-ada1-4597-ad24-10e318f994c8"
         player.main = self
 
-        # print(self.api.get_player_shops(player))
-        # self.api.create_shop(player, "ショップ", 1000, "BUY", False)
+        # print(self.api.get_player_shops(player)[1].category_function.set_category("aaa"))
+        # self.api.create_shop(player, "1", 1000, "BUY", False)
+        # self.api.create_shop(player, "2", 1000, "BUY", False)
+        # self.api.create_shop(player, "3", 1000, "BUY", False)
         # shop = self.api.get_shop("c83bab75-9216-11ed-a3b6-803253476232")
         # shop.money_function.set("account", 1000)
         # print(shop.money_function.get("account"))

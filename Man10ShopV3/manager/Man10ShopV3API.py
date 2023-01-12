@@ -19,6 +19,8 @@ class Man10ShopV3API:
         self.shops: dict[str, Shop] = {}
 
     def get_shop(self, shop_id) -> Shop:
+        if shop_id in self.shops:
+            return self.shops[shop_id]
         shop_object = self.main.mongo["man10shop_v3"]["shops"].find_one({"shopId": shop_id})
         del shop_object["_id"]
         shop = Shop(shop_object)

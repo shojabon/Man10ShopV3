@@ -10,6 +10,7 @@ from Man10ShopV3.shop_functions.PermissionFunction import PermissionFunction
 from Man10ShopV3.shop_functions.PriceFunction import PriceFunction
 from Man10ShopV3.shop_functions.StorageFunction import StorageFunction
 from Man10ShopV3.shop_functions.TargetItemFunction import TargetItemFunction
+from Man10ShopV3.shop_functions.general.CategoryFunction import CategoryFunction
 from utils.JsonTools import flatten_dict, unflatten_dict
 
 if TYPE_CHECKING:
@@ -26,12 +27,15 @@ class Shop(object):
 
         self.functions: list[ShopFunction] = []
 
+        # general functions
+
         self.money_function: MoneyFunction = self.register_function("money", MoneyFunction())
         self.storage_function: StorageFunction = self.register_function("storage", StorageFunction())
         self.price_function: PriceFunction = self.register_function("price", PriceFunction())
         self.target_item_function: TargetItemFunction = self.register_function("target_item", TargetItemFunction())
         self.permission_function: PermissionFunction = self.register_function("permission", PermissionFunction())
-        self.name_function: NameFunction = self.register_function("permission", NameFunction())
+        self.name_function: NameFunction = self.register_function("name", NameFunction())
+        self.category_function: CategoryFunction = self.register_function("category", CategoryFunction())
 
     def get_export_data(self):
         return humps.camelize(self.data)

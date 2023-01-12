@@ -31,7 +31,7 @@ class ShopMethod:
         self.register_endpoint()
 
     def register_endpoint(self):
-        @self.methods.blueprint.route("", methods=["GET"])
+        @self.methods.blueprint.route("list", methods=["POST"])
         @flask_mat_response_wrapper()
         @flask_json_schema(self.schema)
         def shop_information(json_body: dict):
@@ -49,9 +49,11 @@ class ShopMethod:
                         "name": shop.name_function.get_name(),
                         "permission": permission,
                         "money": shop.money_function.get_money(),
-                        "itemCount": shop.storage_function.get_item_count()
+                        "itemCount": shop.storage_function.get_item_count(),
+                        "category": shop.category_function.get_category()
                     })
 
+                results = sorted(results, key=lambda x: x["category"] + "-" + x["name"], reverse=False)
                 return "success", results
             except Exception as e:
                 traceback.print_exc()
