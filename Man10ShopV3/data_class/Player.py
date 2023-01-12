@@ -1,6 +1,7 @@
 from __future__ import annotations
 import json
 import traceback
+import uuid
 
 import requests
 
@@ -22,6 +23,15 @@ class Player(object):
     endpoint: str = None
 
     inventory: dict[str, ItemStack] = None
+
+    def load_from_json(self, data: dict):
+        self.name = data.get("name")
+        self.uuid = data.get("uuid")
+        self.balance = data.get("balance")
+        self.endpoint = data.get("endpoint")
+
+        self.inventory = data.get("inventory")
+        return self
 
     def http_request(self, path: str, method: str = "POST", payload: dict = None, return_json: bool = True):
         try:
@@ -74,7 +84,7 @@ class Player(object):
     def warn_message(self, message: str):
         return self.send_message("§6[§eMan10Shop§dV3§6]§c§l" + message)
 
-    def get_player_data(self):
+    def get_player_data(self) -> dict:
         return self.http_request("/players/" + str(self.uuid), "GET")
 
     # economy
@@ -100,3 +110,9 @@ class Player(object):
         if result is None:
             return False
         return True
+
+    def get_uuid_formatted(self):
+        return self.uuid.replace("-", "").lower()
+
+    def set_uuid_formatted(self, formatted_uuid: str):
+        self.uuid = str(uuid.UUID(hex=formatted_uuid))

@@ -20,11 +20,17 @@ class ShopFunction(object):
 
     # config functions
 
-    def get(self, key):
-        return self.shop.get_variable(self.config_prefix + "." + key)
+    def get(self, key, default_value=None):
+        result = self.shop.get_variable(self.config_prefix + "." + key)
+        if result is None:
+            return default_value
+        return result
 
     def set(self, key, value):
         return self.shop.set_variable(self.config_prefix + "." + key, value)
+
+    def delete(self, key):
+        return self.shop.delete_variable(key)
 
     # base functions
 

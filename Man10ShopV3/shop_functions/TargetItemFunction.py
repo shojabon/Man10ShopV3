@@ -9,7 +9,8 @@ class TargetItemFunction(ShopFunction):
     # variables
 
     def get_target_item(self) -> ItemStack:
-        return self.get("item")
+        default_item = ItemStack()
+        return self.get("item", default_item)
 
     def set_target_item(self, item: ItemStack):
         return self.set("item", item.get_json())

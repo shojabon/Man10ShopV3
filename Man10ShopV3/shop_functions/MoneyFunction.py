@@ -10,7 +10,7 @@ class MoneyFunction(ShopFunction):
     # variables
 
     def get_money(self):
-        return self.get("money")
+        return self.get("money", 0)
 
     def set_money(self, value: int):
         return self.set("money", value)

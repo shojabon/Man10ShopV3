@@ -11,10 +11,10 @@ class StorageFunction(ShopFunction):
     # variables
 
     def get_storage_size(self):
-        return self.get("storage_size")
+        return self.get("storage_size", 64 * 9)
 
     def get_item_count(self):
-        return self.get("item_count")
+        return self.get("item_count", 0)
 
     def set_item_count(self, amount: int):
         return self.set("item_count", amount)

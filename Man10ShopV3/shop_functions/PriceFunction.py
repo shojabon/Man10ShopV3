@@ -8,7 +8,7 @@ class PriceFunction(ShopFunction):
     # variables
 
     def get_price(self):
-        return self.get("price")
+        return self.get("price", 1000)
 
     # =========
 

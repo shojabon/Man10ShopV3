@@ -5,6 +5,8 @@ import humps
 
 from Man10ShopV3.data_class.ShopFunction import ShopFunction
 from Man10ShopV3.shop_functions.MoneyFunction import MoneyFunction
+from Man10ShopV3.shop_functions.NameFunction import NameFunction
+from Man10ShopV3.shop_functions.PermissionFunction import PermissionFunction
 from Man10ShopV3.shop_functions.PriceFunction import PriceFunction
 from Man10ShopV3.shop_functions.StorageFunction import StorageFunction
 from Man10ShopV3.shop_functions.TargetItemFunction import TargetItemFunction
@@ -28,6 +30,8 @@ class Shop(object):
         self.storage_function: StorageFunction = self.register_function("storage", StorageFunction())
         self.price_function: PriceFunction = self.register_function("price", PriceFunction())
         self.target_item_function: TargetItemFunction = self.register_function("target_item", TargetItemFunction())
+        self.permission_function: PermissionFunction = self.register_function("permission", PermissionFunction())
+        self.name_function: NameFunction = self.register_function("permission", NameFunction())
 
     def get_export_data(self):
         return humps.camelize(self.data)
@@ -51,6 +55,13 @@ class Shop(object):
         result = self.api.main.mongo["man10shop_v3"]["shops"].update_one({"shopId": self.get_shop_id()}, {"$set": self.data})
         if result.raw_result["ok"] != 1:
             return False
+        return True
+
+    def delete_variable(self, key):
+        data = flatten_dict(self.data)
+        if key not in data:
+            return False
+        del data[key]
         return True
 
     # base variables
