@@ -29,7 +29,11 @@ class ShopFunction(object):
     # base functions
 
     def item_count(self, order: OrderRequest) -> int:
-        pass # must write
+        if self.shop.get_shop_type() == "SELL":
+            return self.shop.storage_function.get_item_count()
+        else:
+            return self.shop.storage_function.get_item_count()
+
 
     def is_function_enabled(self) -> bool:
         return True

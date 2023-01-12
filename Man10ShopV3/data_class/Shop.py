@@ -5,6 +5,7 @@ import humps
 
 from Man10ShopV3.data_class.ShopFunction import ShopFunction
 from Man10ShopV3.shop_functions.MoneyFunction import MoneyFunction
+from Man10ShopV3.shop_functions.StorageFunction import StorageFunction
 from utils.JsonTools import flatten_dict, unflatten_dict
 
 if TYPE_CHECKING:
@@ -22,6 +23,7 @@ class Shop(object):
         self.functions: list[ShopFunction] = []
 
         self.money_function: MoneyFunction = self.register_function("money", MoneyFunction())
+        self.storage_function: StorageFunction = self.register_function("storage", StorageFunction())
 
     def get_export_data(self):
         return humps.camelize(self.data)
