@@ -55,7 +55,13 @@ class Shop(object):
     def is_admin(self) -> bool:
         return self.get_variable("admin")
 
+    def get_price(self) -> int:
+        return self.get_variable("price")
+
     # shop functions
+
+    def set_shop_type(self):
+        pass # must do
 
     def allowed_to_use_shop(self, order: OrderRequest):
         for function in self.functions:

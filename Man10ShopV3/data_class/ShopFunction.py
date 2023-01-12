@@ -29,16 +29,16 @@ class ShopFunction(object):
     # base functions
 
     def item_count(self, order: OrderRequest) -> int:
-        pass
+        pass # must write
 
     def is_function_enabled(self) -> bool:
-        pass
+        return True
 
     def is_allowed_to_use_shop(self, order: OrderRequest) -> bool:
-        pass
+        return True
 
     def perform_action(self, order: OrderRequest) -> bool:
-        pass
+        return True
 
     def after_perform_action(self, order: OrderRequest):
         pass
