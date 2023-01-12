@@ -12,6 +12,9 @@ class MoneyFunction(ShopFunction):
     def get_money(self):
         return self.get("money")
 
+    def set_money(self, value: int):
+        self.set("money", value)
+
     # =========
 
     def item_count(self, order: OrderRequest) -> int:
