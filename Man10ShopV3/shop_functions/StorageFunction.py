@@ -5,16 +5,15 @@ from Man10ShopV3.data_class.ShopFunction import ShopFunction
 class StorageFunction(ShopFunction):
     allowed_shop_type = ["BUY", "SELL"]
 
-    # storage_size: max storage size
-    # item_count: item count in storage
-
-    # variables
+    def on_function_init(self):
+        self.set_default("storage_size", 64*9)
+        self.set_default("item_count", 0)
 
     def get_storage_size(self):
-        return self.get("storage_size", 64 * 9)
+        return self.get("storage_size")
 
     def get_item_count(self):
-        return self.get("item_count", 0)
+        return self.get("item_count")
 
     def set_item_count(self, amount: int):
         return self.set("item_count", amount)

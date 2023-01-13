@@ -25,7 +25,7 @@ class Shop(object):
     def __init__(self, data):
         self.data = humps.decamelize(data)
 
-        self.functions: list[ShopFunction] = []
+        self.functions: dict[str, ShopFunction] = {}
 
         # general functions
 
@@ -43,8 +43,10 @@ class Shop(object):
     def register_function(self, prefix: str, function: ShopFunction):
         function.shop = self
         function.config_prefix = prefix
-        self.functions.append(function)
-        return function
+
+        function.on_function_init()
+        self.functions[prefix] = function
+        return self.functions[prefix]
 
     # variable
 
@@ -52,14 +54,18 @@ class Shop(object):
         data = flatten_dict(self.data)
         return data.get(key)
 
-    def set_variable(self, key, value):
+    def set_variable(self, key, value, update_db=True):
         data = flatten_dict(self.data)
         data[key] = value
         self.data = unflatten_dict(data)
-        result = self.api.main.mongo["man10shop_v3"]["shops"].update_one({"shopId": self.get_shop_id()}, {"$set": self.data})
-        if result.raw_result["ok"] != 1:
-            return False
-        return True
+        if update_db:
+            result = self.api.main.mongo["man10shop_v3"]["shops"].update_one({"shopId": self.get_shop_id()},
+                                                                             {"$set": self.data})
+            if result.raw_result["ok"] != 1:
+                return False
+            return True
+        else:
+            return True
 
     def delete_variable(self, key):
         data = flatten_dict(self.data)

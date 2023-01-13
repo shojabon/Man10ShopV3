@@ -6,9 +6,11 @@ class PriceFunction(ShopFunction):
     allowed_shop_type = ["BUY", "SELL"]
 
     # variables
+    def on_function_init(self):
+        self.set_default("price", 1000)
 
     def get_price(self):
-        return self.get("price", 1000)
+        return self.get("price")
 
     # =========
 

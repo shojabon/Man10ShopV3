@@ -20,26 +20,29 @@ class ShopFunction(object):
 
     # config functions
 
-    def get(self, key, default_value=None):
-        result = self.shop.get_variable(self.config_prefix + "." + key)
-        if result is None:
-            return default_value
-        return result
+    def set_default(self, key, value):
+        if self.get(key) is None:
+            self.set(key, value, False)
 
-    def set(self, key, value):
-        return self.shop.set_variable(self.config_prefix + "." + key, value)
+    def get(self, key):
+        return self.shop.get_variable(self.config_prefix + "." + key)
+
+    def set(self, key, value, update_db=True):
+        return self.shop.set_variable(self.config_prefix + "." + key, value, update_db)
 
     def delete(self, key):
         return self.shop.delete_variable(key)
 
     # base functions
 
+    def on_function_init(self):
+        pass
+
     def item_count(self, order: OrderRequest) -> int:
         if self.shop.get_shop_type() == "SELL":
             return self.shop.storage_function.get_item_count()
         else:
             return self.shop.storage_function.get_item_count()
-
 
     def is_function_enabled(self) -> bool:
         return True

@@ -58,15 +58,15 @@ class Player(object):
             "playerUuid": self.uuid
         })
 
-    def item_give(self, item: ItemStack, amount: int):
-        command = "mshop itemGive " + self.uuid + " " + item.base64_type + " " + str(amount)
+    def item_give(self, item_base64, amount: int):
+        command = "mshop itemGive " + self.uuid + " " + item_base64 + " " + str(amount)
         result = self.execute_command_in_server(command)
         if result == "success":
             return True
         return False
 
-    def item_take(self, item: ItemStack, amount: int):
-        command = "mshop itemTake " + self.uuid + " " + item.base64_type + " " + str(amount)
+    def item_take(self, item_base64, amount: int):
+        command = "mshop itemTake " + self.uuid + " " + item_base64 + " " + str(amount)
         result = self.execute_command_in_server(command)
         if result == "success":
             return True

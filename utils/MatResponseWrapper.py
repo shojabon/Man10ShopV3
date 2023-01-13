@@ -50,7 +50,7 @@ def flask_mat_response_wrapper():
 
             user_defined_language = request.args.get('lang')
             if user_defined_language is None:
-                user_defined_language = "en"
+                user_defined_language = "jp"
 
             result = convert_response_to_json_response(response, user_defined_language)
             return Response(response=json.dumps(result[0], ensure_ascii=False), status=result[1])

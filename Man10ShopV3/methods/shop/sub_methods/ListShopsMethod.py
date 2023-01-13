@@ -7,7 +7,7 @@ import docker
 
 from Man10ShopV3.data_class.Player import Player
 from Man10ShopV3.data_class.Shop import Shop
-from Man10ShopV3.schema_defenetions.player_schema import player_schema
+from Man10ShopV3.common_variables.common_variables import player_schema
 from utils.JsonSchemaWrapper import flask_json_schema
 from utils.MatResponseWrapper import flask_mat_response_wrapper
 
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from Man10ShopV3.methods.shop import ShopMethods
 
 
-class ShopMethod:
+class ListShopsMethod:
 
     def __init__(self, methods: ShopMethods):
         self.methods = methods
@@ -34,7 +34,7 @@ class ShopMethod:
         @self.methods.blueprint.route("list", methods=["POST"])
         @flask_mat_response_wrapper()
         @flask_json_schema(self.schema)
-        def shop_information(json_body: dict):
+        def shop_list(json_body: dict):
             try:
                 player = Player().load_from_json(json_body["player"])
                 shops = self.methods.main.api.get_player_shops(player)
@@ -47,6 +47,8 @@ class ShopMethod:
                     results.append({
                         "shopId": shop.get_shop_id(),
                         "name": shop.name_function.get_name(),
+                        "shopType": shop.get_shop_type(),
+                        "icon": shop.target_item_function.get_target_item(),
                         "permission": permission,
                         "money": shop.money_function.get_money(),
                         "itemCount": shop.storage_function.get_item_count(),

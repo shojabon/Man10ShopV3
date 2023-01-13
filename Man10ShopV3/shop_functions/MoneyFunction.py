@@ -5,12 +5,13 @@ from Man10ShopV3.data_class.ShopFunction import ShopFunction
 class MoneyFunction(ShopFunction):
     allowed_shop_type = ["BUY", "SELL"]
 
-    # money : total balance in store
+    def on_function_init(self):
+        self.set_default("money", 0)
 
     # variables
 
     def get_money(self):
-        return self.get("money", 0)
+        return self.get("money")
 
     def set_money(self, value: int):
         return self.set("money", value)
