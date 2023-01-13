@@ -6,8 +6,8 @@ class StorageFunction(ShopFunction):
     allowed_shop_type = ["BUY", "SELL"]
 
     def on_function_init(self):
-        self.set_default("storage_size", 64*9)
-        self.set_default("item_count", 0)
+        self.set_variable("storage_size", 64 * 9)
+        self.set_variable("item_count", 0)
 
     def get_storage_size(self):
         return self.get("storage_size")

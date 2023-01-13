@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from flask import Blueprint
 
+from Man10ShopV3.methods.shop.sub_methods.SetVariable import SetVariable
 from Man10ShopV3.methods.shop.sub_methods.ShopInformationMethod import ShopInformationMethod
 from Man10ShopV3.methods.shop.sub_methods.ListShopsMethod import ListShopsMethod
 
@@ -19,5 +20,7 @@ class ShopMethods:
         self.blueprint = Blueprint('shop', __name__, url_prefix="/shop")
         ListShopsMethod(self)
         ShopInformationMethod(self)
+
+        SetVariable(self)
 
         self.main.flask.register_blueprint(self.blueprint)

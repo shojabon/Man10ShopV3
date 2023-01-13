@@ -20,7 +20,8 @@ class ShopFunction(object):
 
     # config functions
 
-    def set_default(self, key, value):
+    def set_variable(self, key, value, permission="MODERATOR"):
+        self.shop.variable_permissions[self.config_prefix + "." + key] = permission
         if self.get(key) is None:
             self.set(key, value, False)
 

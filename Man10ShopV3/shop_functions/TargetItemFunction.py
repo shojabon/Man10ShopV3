@@ -12,8 +12,8 @@ class TargetItemFunction(ShopFunction):
     # variables
 
     def on_function_init(self):
-        self.set_default("item", ItemStack().base64)
-        self.set_default("item_hash", ItemStack().md5)
+        self.set_variable("item", ItemStack().base64)
+        self.set_variable("item_hash", ItemStack().md5)
 
     def get_target_item(self) -> str:
         return self.get("item")

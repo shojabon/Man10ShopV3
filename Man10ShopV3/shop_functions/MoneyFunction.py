@@ -6,7 +6,7 @@ class MoneyFunction(ShopFunction):
     allowed_shop_type = ["BUY", "SELL"]
 
     def on_function_init(self):
-        self.set_default("money", 0)
+        self.set_variable("money", 0)
 
     # variables
 

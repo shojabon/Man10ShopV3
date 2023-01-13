@@ -22,6 +22,8 @@ class Shop(object):
 
     api: Man10ShopV3API = None
 
+    variable_permissions = {}
+
     def __init__(self, data):
         self.data = humps.decamelize(data)
 

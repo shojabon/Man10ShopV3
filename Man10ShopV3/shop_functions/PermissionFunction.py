@@ -7,7 +7,7 @@ class PermissionFunction(ShopFunction):
     allowed_shop_type = []
 
     def on_function_init(self):
-        self.set_default("users", {})
+        self.set_variable("users", {})
 
     def set_permission(self, player: Player, permission: str):
         self.set("users." + player.get_uuid_formatted(), permission)
