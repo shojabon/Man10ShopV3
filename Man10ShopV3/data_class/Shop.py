@@ -4,6 +4,7 @@ import traceback
 from typing import TYPE_CHECKING, Callable
 import humps
 
+from Man10ShopV3.data_class.Player import Player
 from Man10ShopV3.data_class.ShopFunction import ShopFunction
 from Man10ShopV3.shop_functions.MoneyFunction import MoneyFunction
 from Man10ShopV3.shop_functions.NameFunction import NameFunction
@@ -12,6 +13,7 @@ from Man10ShopV3.shop_functions.PriceFunction import PriceFunction
 from Man10ShopV3.shop_functions.StorageFunction import StorageFunction
 from Man10ShopV3.shop_functions.TargetItemFunction import TargetItemFunction
 from Man10ShopV3.shop_functions.general.CategoryFunction import CategoryFunction
+from utils.JsonSchemaWrapper import merge_dictionaries
 from utils.JsonTools import flatten_dict, unflatten_dict
 
 if TYPE_CHECKING:
@@ -40,6 +42,9 @@ class Shop(object):
         self.permission_function: PermissionFunction = self.register_function("permission", PermissionFunction())
         self.name_function: NameFunction = self.register_function("name", NameFunction())
         self.category_function: CategoryFunction = self.register_function("category", CategoryFunction())
+
+
+        self.register_queue_callback("shop.order", self.accept_order)
 
     def get_export_data(self):
         return humps.camelize(self.data)
@@ -107,13 +112,25 @@ class Shop(object):
     def get_price(self) -> int:
         return self.get_variable("price")
 
+    # queue task
+
+    def accept_order(self, data):
+        if "amount" not in data["data"]:
+            return
+
+        order = OrderRequest()
+        order.amount = data["data"]["amount"]
+        order.player = data["player"]
+        print(self.perform_action(order))
+
+
     # shop functions
 
     def set_shop_type(self):
         pass # must do
 
     def allowed_to_use_shop(self, order: OrderRequest):
-        for function in self.functions:
+        for function in self.functions.values():
             function: ShopFunction = function
             if not function.is_function_enabled(): continue
             if self.get_shop_type() not in function.allowed_shop_type: continue
@@ -124,13 +141,13 @@ class Shop(object):
         if not self.allowed_to_use_shop(order):
             return False
 
-        for function in self.functions:
+        for function in self.functions.values():
             function: ShopFunction = function
             if not function.is_function_enabled(): continue
             if self.get_shop_type() not in function.allowed_shop_type: continue
-            if not self.perform_action(order): return False
+            if not function.perform_action(order): return False
 
-        for function in self.functions:
+        for function in self.functions.values():
             function: ShopFunction = function
             if not function.is_function_enabled(): continue
             if self.get_shop_type() not in function.allowed_shop_type: continue
@@ -140,3 +157,29 @@ class Shop(object):
         # log ?
 
         return True
+
+    def get_item_count(self, player: Player):
+        result = self.storage_function.get_storage_size()
+
+        for function in self.functions.values():
+            function: ShopFunction = function
+            if not function.is_function_enabled(): continue
+            if self.get_shop_type() not in function.allowed_shop_type: continue
+            count = function.item_count(player)
+            if count is None: continue
+            if count < result:
+                result = count
+
+        return abs(result)
+
+    def get_menu_info(self, player: Player):
+        result = {}
+        for function in self.functions.values():
+            function: ShopFunction = function
+            if not function.is_function_enabled(): continue
+            if self.get_shop_type() not in function.allowed_shop_type: continue
+            info = function.menu_info(player)
+            if info is None: continue
+            info = merge_dictionaries(result, info)
+        return result
+

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from Man10ShopV3.data_class.OrderRequest import OrderRequest
 from Man10ShopV3.data_class.Player import Player
 from Man10ShopV3.data_class.Response import RequestResponse
@@ -70,8 +72,8 @@ class StorageFunction(ShopFunction):
 
     # =========
 
-    def item_count(self, order: OrderRequest) -> int:
-        if self.shop.is_admin(): return 0
+    def item_count(self, order: OrderRequest) -> Optional[int]:
+        if self.shop.is_admin(): return None
         if self.shop.get_shop_type() == "BUY":
             return self.get_item_count()
         if self.shop.get_shop_type() == "SELL":

@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
+from Man10ShopV3.data_class.Player import Player
 
 if TYPE_CHECKING:
     from Man10ShopV3.data_class.Shop import Shop
@@ -39,11 +40,11 @@ class ShopFunction(object):
     def on_function_init(self):
         pass
 
-    def item_count(self, order: OrderRequest) -> int:
+    def item_count(self, player: Player) -> Optional[int]:
         if self.shop.get_shop_type() == "SELL":
             return self.shop.storage_function.get_item_count()
         else:
-            return self.shop.storage_function.get_item_count()
+            return None
 
     def is_function_enabled(self) -> bool:
         return True
@@ -55,4 +56,7 @@ class ShopFunction(object):
         return True
 
     def after_perform_action(self, order: OrderRequest):
+        pass
+
+    def menu_info(self, player: Player) -> dict:
         pass

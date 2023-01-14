@@ -43,10 +43,16 @@ class ShopInformationMethod:
                 if shop is None:
                     return "shop_invalid",
                 result = shop.get_export_data()
+                player = None
 
                 if "player" in json_body:
                     player = Player().load_from_json(json_body["player"], self.methods.main)
                     result["playerPermission"] = shop.permission_function.get_permission(player)
+
+                menu_info = shop.get_menu_info(player)
+                result["menu_info"] = menu_info
+                result["menu_info"]["trade_item_count"] = shop.get_item_count(player)
+
 
                 return "success", result
             except Exception as e:

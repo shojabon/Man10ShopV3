@@ -15,6 +15,6 @@ class OrderRequest(object):
     amount = 1
     player: Player = None
 
-    def __init__(self, main: Man10ShopV3):
-        self.main = main
+    # def __init__(self, main: Man10ShopV3):
+    #     self.main = main
 

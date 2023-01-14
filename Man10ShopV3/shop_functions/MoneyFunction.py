@@ -71,12 +71,12 @@ class MoneyFunction(ShopFunction):
 
     # =========
 
-    def item_count(self, order: OrderRequest) -> int:
+    def item_count(self, player: Player) -> int:
         if self.shop.is_admin(): return 0
         if self.shop.get_shop_type() == "SELL":
-            if self.shop.get_price() == 0: return super().item_count(order)
+            if self.shop.get_price() == 0: return super().item_count(player)
             return self.get_money() // self.shop.get_price()
-        return super().item_count(order)
+        return super().item_count(player)
 
     def is_allowed_to_use_shop(self, order: OrderRequest) -> bool:
         if self.shop.get_shop_type() == "SELL":

@@ -34,7 +34,7 @@ class PriceFunction(ShopFunction):
     def is_allowed_to_use_shop(self, order: OrderRequest) -> bool:
         if self.shop.get_shop_type() == "BUY":
             total_price = self.get_price() * order.amount
-            if total_price < order.player.get_balance():
+            if total_price > order.player.get_balance():
                 order.player.warn_message("現金が不足しています")
                 return False
 

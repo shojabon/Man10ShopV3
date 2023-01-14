@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from Man10ShopV3.data_class.Player import Player
 from Man10ShopV3.data_class.Shop import Shop
@@ -18,10 +18,12 @@ class Man10ShopV3API:
 
         self.shops: dict[str, Shop] = {}
 
-    def get_shop(self, shop_id) -> Shop:
+    def get_shop(self, shop_id) -> Optional[Shop]:
         # if shop_id in self.shops:
         #     return self.shops[shop_id]
         shop_object = self.main.mongo["man10shop_v3"]["shops"].find_one({"shopId": shop_id})
+        if shop_object is None:
+            return None
         del shop_object["_id"]
         shop = Shop(shop_object)
         shop.api = self
