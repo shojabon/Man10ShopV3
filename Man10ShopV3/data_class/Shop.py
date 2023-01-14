@@ -10,6 +10,7 @@ from Man10ShopV3.shop_functions.MoneyFunction import MoneyFunction
 from Man10ShopV3.shop_functions.NameFunction import NameFunction
 from Man10ShopV3.shop_functions.PermissionFunction import PermissionFunction
 from Man10ShopV3.shop_functions.PriceFunction import PriceFunction
+from Man10ShopV3.shop_functions.SignFunction import SignFunction
 from Man10ShopV3.shop_functions.StorageFunction import StorageFunction
 from Man10ShopV3.shop_functions.TargetItemFunction import TargetItemFunction
 from Man10ShopV3.shop_functions.general.CategoryFunction import CategoryFunction
@@ -27,9 +28,9 @@ class Shop(object):
 
     variable_permissions = {}
 
-    def __init__(self, data):
-        self.data = humps.decamelize(data)
+    def __init__(self):
 
+        self.data = {}
         self.functions: dict[str, ShopFunction] = {}
         self.queue_callbacks: dict[str, list[Callable]] = {}
 
@@ -41,10 +42,14 @@ class Shop(object):
         self.target_item_function: TargetItemFunction = self.register_function("target_item", TargetItemFunction())
         self.permission_function: PermissionFunction = self.register_function("permission", PermissionFunction())
         self.name_function: NameFunction = self.register_function("name", NameFunction())
+        self.sign_function: SignFunction = self.register_function("sign", SignFunction())
         self.category_function: CategoryFunction = self.register_function("category", CategoryFunction())
 
-
         self.register_queue_callback("shop.order", self.accept_order)
+
+    def from_json(self, data: dict, main: Man10ShopV3API):
+        self.data = merge_dictionaries(self.data, humps.decamelize(data))
+        self.api = main
 
     def get_export_data(self):
         return humps.camelize(self.data)
@@ -109,9 +114,6 @@ class Shop(object):
     def is_admin(self) -> bool:
         return self.get_variable("admin")
 
-    def get_price(self) -> int:
-        return self.get_variable("price")
-
     # queue task
 
     def accept_order(self, data):
@@ -121,13 +123,10 @@ class Shop(object):
         order = OrderRequest()
         order.amount = data["data"]["amount"]
         order.player = data["player"]
-        print(self.perform_action(order))
+        self.perform_action(order)
 
 
     # shop functions
-
-    def set_shop_type(self):
-        pass # must do
 
     def allowed_to_use_shop(self, order: OrderRequest):
         for function in self.functions.values():
@@ -153,6 +152,7 @@ class Shop(object):
             if self.get_shop_type() not in function.allowed_shop_type: continue
             function.after_perform_action(order)
 
+        order.player.send_message("成功しました")
         # send success message?
         # log ?
 
@@ -180,6 +180,28 @@ class Shop(object):
             if self.get_shop_type() not in function.allowed_shop_type: continue
             info = function.menu_info(player)
             if info is None: continue
-            info = merge_dictionaries(result, info)
+            result = merge_dictionaries(result, info)
+        return result
+
+    def get_sign_info(self):
+        result = [
+            "ショップ",
+            "§b" + str(self.price_function.get_price()) + "円",
+            "",
+            ""
+        ]
+        if self.get_shop_type() == "BUY":
+            result[0] = "§a§l販売ショップ"
+
+        if self.get_shop_type() == "SELL":
+            result[0] = "§c§l買取ショップ"
+
+        for function in self.functions.values():
+            function: ShopFunction = function
+            if not function.is_function_enabled(): continue
+            if self.get_shop_type() not in function.allowed_shop_type: continue
+            info = function.sign_information(result)
+            if info is None: continue
+            result = info
         return result
 

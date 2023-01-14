@@ -68,7 +68,6 @@ class MoneyFunction(ShopFunction):
             else:
                 player.warn_message("出金に失敗しました")
 
-
     # =========
 
     def item_count(self, player: Player) -> int:
@@ -81,6 +80,6 @@ class MoneyFunction(ShopFunction):
     def is_allowed_to_use_shop(self, order: OrderRequest) -> bool:
         if self.shop.get_shop_type() == "SELL":
             if self.get_money() < self.shop.get_price() and not self.shop.is_admin():
-                order.player.warn_message("ショップ残金不足してます")
+                order.player.warn_message("ショップの残金不足してます")
                 return False
         return True

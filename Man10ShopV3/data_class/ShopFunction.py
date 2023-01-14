@@ -60,3 +60,6 @@ class ShopFunction(object):
 
     def menu_info(self, player: Player) -> dict:
         pass
+
+    def sign_information(self, sign_info: list) -> list:
+        pass

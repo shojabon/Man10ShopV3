@@ -73,6 +73,11 @@ class Player(object):
         command = "mshop itemTake " + self.uuid + " " + item_base64 + " " + str(amount)
         result = self.execute_command_in_server(command)
         return RequestResponse(result)
+
+    def item_check(self, item_base64, amount: int):
+        command = "mshop itemCheck " + self.uuid + " " + item_base64 + " " + str(amount)
+        result = self.execute_command_in_server(command)
+        return RequestResponse(result)
     def execute_command_in_server(self, command):
         result = self.http_request("/server/exec", "POST", {
             "command": command

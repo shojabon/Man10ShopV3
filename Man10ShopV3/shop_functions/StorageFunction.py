@@ -86,7 +86,7 @@ class StorageFunction(ShopFunction):
                 order.player.warn_message("ショップの倉庫がいっぱいです")
                 return False
 
-        if self.shop.get_shop_id() == "BUY":
+        if self.shop.get_shop_type() == "BUY":
             if order.amount > self.get_item_count() and not self.shop.is_admin():
                 order.player.warn_message("在庫がありません")
                 return False

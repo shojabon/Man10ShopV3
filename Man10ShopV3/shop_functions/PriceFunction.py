@@ -17,16 +17,17 @@ class PriceFunction(ShopFunction):
     def perform_action(self, order: OrderRequest) -> bool:
         if self.shop.get_shop_type() == "BUY":
             total_price = self.get_price() * order.amount
-            if not order.player.take_money(total_price):
-                # 内部エラーが発生しました
+            take_money_request = order.player.take_money(total_price)
+            if not take_money_request.success():
+                order.player.warn_message(take_money_request.message())
                 return False
 
-            self.shop.money_function.set_money(self.shop.money_function.get_money() + total_price)
+            self.shop.money_function.add_money(total_price)
 
         if self.shop.get_shop_type() == "SELL":
             total_price = self.get_price() * order.amount
-            if not self.shop.money_function.set_money(self.shop.money_function.get_money() - total_price):
-                # 内部エラー
+            if not self.shop.money_function.remove_money(total_price):
+                order.player.warn_message("内部エラーが発生しました")
                 return False
             order.player.give_money(total_price)
         return True

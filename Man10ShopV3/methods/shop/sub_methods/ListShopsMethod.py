@@ -22,6 +22,9 @@ class ListShopsMethod:
         self.schema = {
             "type": "object",
             "properties": {
+                "admin": {
+                    "type": "boolean"
+                },
                 "player": player_schema,
             },
             "required": ["player"]
@@ -38,6 +41,9 @@ class ListShopsMethod:
             try:
                 player = Player().load_from_json(json_body["player"], self.methods.main)
                 shops = self.methods.main.api.get_player_shops(player)
+
+                if "admin" in json_body and json_body["admin"]:
+                    shops = self.methods.main.api.get_admin_shops()
 
                 results = []
                 for shop in shops:

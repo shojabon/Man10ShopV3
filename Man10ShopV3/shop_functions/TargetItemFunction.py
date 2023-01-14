@@ -36,20 +36,17 @@ class TargetItemFunction(ShopFunction):
                 return False
             order.player.item_give(self.get_target_item(), order.amount) # check for exceptions ?
         if self.shop.get_shop_type() == "SELL":
-            if not order.player.item_take(self.get_target_item(), order.amount):
+            item_take_request = order.player.item_take(self.get_target_item(), order.amount)
+            if not item_take_request.success():
                 order.player.warn_message("買い取るためのアイテムが不足してます")
                 return False
-            if not self.shop.storage_function.add_item_count(order.amount):
-                order.player.warn_message("内部エラーが発生しました")
-                return False
+            self.shop.storage_function.add_item_count(order.amount) # check for exceptions
         return True
 
     def is_allowed_to_use_shop(self, order: OrderRequest) -> bool:
         if self.shop.get_shop_type() == "SELL":
-            if self.get_target_item_hash() not in order.player.inventory:
-                order.player.warn_message("買い取るためのアイテムが不足してます")
-                return False
-            if order.player.inventory[self.get_target_item_hash()] < order.amount:
+            check_item_request = order.player.item_check(self.shop.target_item_function.get_target_item(), order.amount)
+            if not check_item_request.success():
                 order.player.warn_message("買い取るためのアイテムが不足してます")
                 return False
         return True

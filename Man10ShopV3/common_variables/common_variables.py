@@ -23,3 +23,25 @@ player_schema = {
     },
     "required": ["name", "uuid"]
 }
+
+location_schema = {
+    "type": "object",
+    "properties": {
+        "server": {
+            "type": "string"
+        },
+        "world": {
+            "type": "string"
+        },
+        "x": {
+            "type": "integer"
+        },
+        "y": {
+            "type": "integer"
+        },
+        "z": {
+            "type": "integer"
+        },
+    },
+    "required": ["server", "world", "x", "y", "z"]
+}
