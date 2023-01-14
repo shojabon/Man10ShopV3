@@ -12,6 +12,18 @@ for path in glob.glob("error_codes/*.json"):
     file = open(path, "r", encoding="utf-8")
     error_codes[code_name] = json.loads(file.read())
     file.close()
+def get_error_message(error_code: str, language: str = "jp"):
+    result = "不明なエラーが発生しました"
+    if error_code in error_codes:
+        status_data = error_codes[error_code]
+    else:
+        status_data = error_codes["unknown_response"]
+    if "message" in status_data:
+        if language in status_data["message"]:
+            result = status_data["message"][language]
+        else:
+            result = status_data["message"]["en"]
+    return result
 
 
 def convert_response_to_json_response(response: dict, language: str = "en"):

@@ -1,4 +1,7 @@
 import json
+import time
+import traceback
+from threading import Thread
 
 from flask import Flask
 from pymongo import MongoClient
@@ -11,9 +14,34 @@ from Man10ShopV3.methods.shop import ShopMethods
 
 class Man10ShopV3:
 
+    def process_queue(self):
+        while self.running:
+            try:
+                completed_task = []
+                result = self.mongo["man10shop_v3"]["queue"].find({}).limit(1)
+                result = [x for x in result]
+                for request in result:
+                    if "player" in request:
+                        player_data = request["player"]
+                        request["player"] = Player().load_from_json(player_data, self)
+                    completed_task.append(request["_id"])
+                    shop = self.api.get_shop(request["shopId"])
+                    if shop is None:
+                        continue
+
+                    shop.execute_queue_callback(request["key"], request)
+
+                self.mongo["man10shop_v3"]["queue"].delete_many({"_id": {"$in": completed_task}})
+                time.sleep(0.1)
+
+            except Exception:
+                traceback.print_exc()
+                continue
+
     def __init__(self):
         # variables
         self.flask = Flask(__name__)
+        self.running = True
         self.flask.url_map.strict_slashes = False
         self.config = {}
         # load config
@@ -31,6 +59,8 @@ class Man10ShopV3:
         self.api = Man10ShopV3API(self)
 
         self.shop_method = ShopMethods(self)
+
+        Thread(target=self.process_queue).start()
 
         # self.shop = InstanceMethod(self)
         player = Player()
@@ -57,3 +87,4 @@ class Man10ShopV3:
         # print(order.player.send_message("hello"))
 
         self.flask.run("0.0.0.0", self.config["hostPort"])
+        self.running = False

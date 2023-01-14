@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import traceback
+from typing import TYPE_CHECKING, Callable
 import humps
 
 from Man10ShopV3.data_class.ShopFunction import ShopFunction
@@ -28,6 +29,7 @@ class Shop(object):
         self.data = humps.decamelize(data)
 
         self.functions: dict[str, ShopFunction] = {}
+        self.queue_callbacks: dict[str, list[Callable]] = {}
 
         # general functions
 
@@ -49,6 +51,21 @@ class Shop(object):
         function.on_function_init()
         self.functions[prefix] = function
         return self.functions[prefix]
+
+    def register_queue_callback(self, key: str, function: Callable):
+        if key not in self.queue_callbacks:
+            self.queue_callbacks[key] = []
+        self.queue_callbacks[key].append(function)
+
+    def execute_queue_callback(self, key: str, data: dict):
+        if key not in self.queue_callbacks:
+            return
+        for function in self.queue_callbacks[key]:
+            try:
+                function(data)
+            except Exception:
+                traceback.print_exc()
+                pass
 
     # variable
 

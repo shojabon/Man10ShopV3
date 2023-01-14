@@ -36,7 +36,7 @@ class ListShopsMethod:
         @flask_json_schema(self.schema)
         def shop_list(json_body: dict):
             try:
-                player = Player().load_from_json(json_body["player"])
+                player = Player().load_from_json(json_body["player"], self.methods.main)
                 shops = self.methods.main.api.get_player_shops(player)
 
                 results = []

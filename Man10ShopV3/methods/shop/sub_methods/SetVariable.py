@@ -52,7 +52,7 @@ class SetVariable:
                 json_body["key"] = humps.decamelize(json_body["key"])
 
                 if "player" in json_body:
-                    player = Player().load_from_json(json_body["player"])
+                    player = Player().load_from_json(json_body["player"], self.methods.main)
                     owning_permission = shop.permission_function.get_permission(player)
 
                 if json_body["key"] in shop.variable_permissions:

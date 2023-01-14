@@ -8,6 +8,8 @@ import requests
 from typing import TYPE_CHECKING
 
 from Man10ShopV3.data_class.ItemStack import ItemStack
+from Man10ShopV3.data_class.Response import RequestResponse
+from utils.MatResponseWrapper import get_error_message
 
 if TYPE_CHECKING:
     from Man10ShopV3 import Man10ShopV3
@@ -24,11 +26,14 @@ class Player(object):
 
     inventory: dict[str, ItemStack] = None
 
-    def load_from_json(self, data: dict):
+    def load_from_json(self, data: dict, main: Man10ShopV3):
         self.name = data.get("name")
+        self.main = main
         self.uuid = data.get("uuid")
         self.balance = data.get("balance")
         self.endpoint = data.get("endpoint")
+        if self.endpoint is None:
+            self.endpoint = "man10"
 
         self.inventory = data.get("inventory")
         return self
@@ -50,6 +55,7 @@ class Player(object):
             else:
                 return req.text
         except Exception as e:
+            traceback.print_exc()
             return None
 
     def send_message(self, message):
@@ -94,22 +100,12 @@ class Player(object):
         return player_data["balance"]
 
     def give_money(self, amount: float):
-        result = self.http_request("/economy/pay", "POST", {
-            "uuid": self.uuid,
-            "amount": amount
-        })
-        if result is None:
-            return False
-        return True
+        result = self.execute_command_in_server("mshop moneyGive " + self.uuid + " " + str(amount))
+        return RequestResponse(result)
 
     def take_money(self, amount: float):
-        result = self.http_request("/economy/debit", "POST", {
-            "uuid": self.uuid,
-            "amount": amount
-        })
-        if result is None:
-            return False
-        return True
+        result = self.execute_command_in_server("mshop moneyTake " + self.uuid + " " + str(amount))
+        return RequestResponse(result)
 
     def get_uuid_formatted(self):
         return self.uuid.replace("-", "").lower()
