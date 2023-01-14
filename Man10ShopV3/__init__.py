@@ -86,5 +86,5 @@ class Man10ShopV3:
 
         # print(order.player.send_message("hello"))
 
-        self.flask.run("0.0.0.0", self.config["hostPort"])
+        self.flask.run("0.0.0.0", self.config["hostPort"], threaded=True)
         self.running = False

@@ -7,9 +7,9 @@ import humps
 from Man10ShopV3.data_class.Player import Player
 from Man10ShopV3.data_class.ShopFunction import ShopFunction
 from Man10ShopV3.shop_functions.MoneyFunction import MoneyFunction
-from Man10ShopV3.shop_functions.NameFunction import NameFunction
+from Man10ShopV3.shop_functions.general.NameFunction import NameFunction
 from Man10ShopV3.shop_functions.PermissionFunction import PermissionFunction
-from Man10ShopV3.shop_functions.PriceFunction import PriceFunction
+from Man10ShopV3.shop_functions.general.PriceFunction import PriceFunction
 from Man10ShopV3.shop_functions.SignFunction import SignFunction
 from Man10ShopV3.shop_functions.StorageFunction import StorageFunction
 from Man10ShopV3.shop_functions.TargetItemFunction import TargetItemFunction
@@ -27,6 +27,7 @@ class Shop(object):
     api: Man10ShopV3API = None
 
     variable_permissions = {}
+    variable_callbacks = {}
 
     def __init__(self):
 
@@ -87,9 +88,10 @@ class Shop(object):
         data = flatten_dict(self.data)
         data[key] = value
         self.data = unflatten_dict(data)
+
         if update_db:
             result = self.api.main.mongo["man10shop_v3"]["shops"].update_one({"shopId": self.get_shop_id()},
-                                                                             {"$set": self.data})
+                                                                             {"$set": humps.camelize(self.data)})
             if result.raw_result["ok"] != 1:
                 return False
             return True

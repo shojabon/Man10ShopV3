@@ -37,52 +37,26 @@ class Player(object):
 
         self.inventory = data.get("inventory")
         return self
-
-    def http_request(self, path: str, method: str = "POST", payload: dict = None, return_json: bool = True):
-        try:
-            req = {}
-            if method == "GET":
-                req = requests.get(self.main.config["api"]["endpoint"].replace("{endpoint}", self.endpoint) + path,
-                                   data=payload, headers={"x-api-key": self.main.config["api"]["key"]})
-            if method == "POST":
-                req = requests.post(self.main.config["api"]["endpoint"].replace("{endpoint}", self.endpoint) + path,
-                                    data=payload, headers={"x-api-key": self.main.config["api"]["key"]})
-
-            if req.status_code != 200:
-                return None
-            if return_json:
-                return json.loads(req.text)
-            else:
-                return req.text
-        except Exception as e:
-            traceback.print_exc()
-            return None
-
     def send_message(self, message):
-        return self.http_request("/chat/tell", "POST", {
+        return self.main.api.http_request(self.endpoint, "/chat/tell", "POST", {
             "message": message,
             "playerUuid": self.uuid
         })
 
     def item_give(self, item_base64, amount: int):
         command = "mshop itemGive " + self.uuid + " " + item_base64 + " " + str(amount)
-        result = self.execute_command_in_server(command)
+        result = self.main.api.execute_command_in_server(self.endpoint, command)
         return RequestResponse(result)
 
     def item_take(self, item_base64, amount: int):
         command = "mshop itemTake " + self.uuid + " " + item_base64 + " " + str(amount)
-        result = self.execute_command_in_server(command)
+        result = self.main.api.execute_command_in_server(self.endpoint, command)
         return RequestResponse(result)
 
     def item_check(self, item_base64, amount: int):
         command = "mshop itemCheck " + self.uuid + " " + item_base64 + " " + str(amount)
-        result = self.execute_command_in_server(command)
+        result = self.main.api.execute_command_in_server(self.endpoint, command)
         return RequestResponse(result)
-    def execute_command_in_server(self, command):
-        result = self.http_request("/server/exec", "POST", {
-            "command": command
-        }, False)
-        return result
 
     def success_message(self, message: str):
         return self.send_message("§6[§eMan10Shop§dV3§6]§a§l" + message)
@@ -91,7 +65,7 @@ class Player(object):
         return self.send_message("§6[§eMan10Shop§dV3§6]§c§l" + message)
 
     def get_player_data(self) -> dict:
-        return self.http_request("/players/" + str(self.uuid), "GET")
+        return self.main.api.http_request(self.endpoint, "/players/" + str(self.uuid), "GET")
 
     # economy
 
@@ -100,11 +74,11 @@ class Player(object):
         return player_data["balance"]
 
     def give_money(self, amount: float):
-        result = self.execute_command_in_server("mshop moneyGive " + self.uuid + " " + str(amount))
+        result = self.main.api.execute_command_in_server(self.endpoint, "mshop moneyGive " + self.uuid + " " + str(amount))
         return RequestResponse(result)
 
     def take_money(self, amount: float):
-        result = self.execute_command_in_server("mshop moneyTake " + self.uuid + " " + str(amount))
+        result = self.main.api.execute_command_in_server(self.endpoint, "mshop moneyTake " + self.uuid + " " + str(amount))
         return RequestResponse(result)
 
     def get_uuid_formatted(self):

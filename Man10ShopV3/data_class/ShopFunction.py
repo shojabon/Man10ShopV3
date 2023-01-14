@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+import traceback
+from typing import TYPE_CHECKING, Optional, Callable
 
 from Man10ShopV3.data_class.Player import Player
 
@@ -30,7 +31,10 @@ class ShopFunction(object):
         return self.shop.get_variable(self.config_prefix + "." + key)
 
     def set(self, key, value, update_db=True):
-        return self.shop.set_variable(self.config_prefix + "." + key, value, update_db)
+        result = self.shop.set_variable(self.config_prefix + "." + key, value, update_db)
+        if not result:
+            return False
+        return result
 
     def delete(self, key):
         return self.shop.delete_variable(key)

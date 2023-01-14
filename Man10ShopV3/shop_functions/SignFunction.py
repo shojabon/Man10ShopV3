@@ -15,6 +15,14 @@ class SignFunction(ShopFunction):
     def get_signs(self):
         return self.get("signs")
 
+    def update_signs(self):
+        servers = []
+        for sign in self.shop.sign_function.get_signs().values():
+            if sign["server"] not in servers:
+                servers.append(sign["server"])
+        for server in servers:
+            self.shop.api.execute_command_in_server(server, "mshop signUpdate " + str(self.shop.get_shop_id()))
+
     def add_sign(self, sign: Sign):
         signs = self.get_signs()
         signs[sign.location_id()] = sign.get_json()

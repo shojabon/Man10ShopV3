@@ -1,3 +1,5 @@
+import hashlib
+
 from utils.MatResponseWrapper import get_error_message
 
 
@@ -27,4 +29,7 @@ class Sign(object):
         }
 
     def location_id(self):
-        return str(self.server) + "|" + str(self.word) + "|" + str(self.x) + "|" + str(self.y) + "|" + str(self.z)
+        md5 = hashlib.md5()
+        location_id = str(self.server) + "|" + str(self.word) + "|" + str(self.x) + "|" + str(self.y) + "|" + str(self.z)
+        md5.update(location_id.encode("utf-8"))
+        return md5.hexdigest()

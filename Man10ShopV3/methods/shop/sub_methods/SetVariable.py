@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import traceback
+from threading import Thread
 from typing import TYPE_CHECKING, Optional
 
 import docker
@@ -63,6 +64,10 @@ class SetVariable:
 
                 if not shop.set_variable(json_body["key"], json_body["value"], True):
                     return "error_internal"
+
+                def update_signs():
+                    shop.sign_function.update_signs()
+                Thread(target=update_signs).start()
 
                 return "success"
             except Exception as e:

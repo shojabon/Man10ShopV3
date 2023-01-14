@@ -8,7 +8,6 @@ class PriceFunction(ShopFunction):
     # variables
     def on_function_init(self):
         self.set_variable("price", 1000)
-
     def get_price(self):
         return self.get("price")
 

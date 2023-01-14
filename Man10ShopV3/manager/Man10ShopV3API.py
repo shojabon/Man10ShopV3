@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import json
 import traceback
 import uuid
 from typing import TYPE_CHECKING, Optional
+
+import requests
 
 from Man10ShopV3.data_class.Player import Player
 from Man10ShopV3.data_class.Shop import Shop
@@ -69,4 +72,31 @@ class Man10ShopV3API:
             return [x for x in query if x is not None]
         except Exception:
             return []
+
+    def http_request(self, endpoint: str, path: str, method: str = "POST", payload: dict = None, return_json: bool = True):
+        try:
+            req = {}
+            if method == "GET":
+                req = requests.get(self.main.config["api"]["endpoint"].replace("{endpoint}", endpoint) + path,
+                                   data=payload, headers={"x-api-key": self.main.config["api"]["key"]})
+            if method == "POST":
+                req = requests.post(self.main.config["api"]["endpoint"].replace("{endpoint}", endpoint) + path,
+                                    data=payload, headers={"x-api-key": self.main.config["api"]["key"]})
+
+            if req.status_code != 200:
+                return None
+            if return_json:
+                return json.loads(req.text)
+            else:
+                return req.text
+        except Exception as e:
+            traceback.print_exc()
+            return None
+
+    def execute_command_in_server(self, endpoint, command):
+        print("executing command", command)
+        result = self.main.api.http_request(endpoint, "/server/exec", "POST", {
+            "command": command
+        }, False)
+        return result
 
