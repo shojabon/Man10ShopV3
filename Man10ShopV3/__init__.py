@@ -51,7 +51,6 @@ class Man10ShopV3:
         config_file.close()
 
         self.mongo = MongoClient(self.config["mongodbConnectionString"])
-
         # print([x for x in self.mongo["man10shop_v3"]["shops"].find({})])
 
         # load api

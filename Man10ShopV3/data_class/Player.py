@@ -3,12 +3,14 @@ import json
 import traceback
 import uuid
 
+import humps
 import requests
 
 from typing import TYPE_CHECKING
 
 from Man10ShopV3.data_class.ItemStack import ItemStack
 from Man10ShopV3.data_class.Response import RequestResponse
+from utils.JsonTools import flatten_dict
 from utils.MatResponseWrapper import get_error_message
 
 if TYPE_CHECKING:
@@ -37,6 +39,35 @@ class Player(object):
 
         self.inventory = data.get("inventory")
         return self
+
+    # ======= data store =========
+    def set_data(self, shop_id: str, key:str, data):
+        key = shop_id + "." + key
+        if data is None:
+            self.main.mongo["man10shop_v3"]["player_data"].update_one({
+                "uuid": self.uuid
+            }, {humps.camelize(key): {"$unset": True}})
+            return True
+        else:
+            result = self.main.mongo["man10shop_v3"]["player_data"].update_one({
+                "shopId": shop_id,
+            }, {humps.camelize(key): data})
+            if result.raw_result["ok"] != 1:
+                return False
+            return True
+
+    def get_data(self, shop_id: str, key: str):
+        result = self.main.mongo["man10shop_v3"]["player_data"].find_one({"uuid": self.uuid})
+        if result is None:
+            return None
+        key = shop_id + "." + key
+        key = humps.camelize(key)
+        result = flatten_dict(result)
+        if key not in result:
+            return None
+        return result[key]
+
+    # ======= minecraft functions ========
     def send_message(self, message):
         return self.main.api.http_request(self.endpoint, "/chat/tell", "POST", {
             "message": message,
@@ -81,6 +112,7 @@ class Player(object):
         result = self.main.api.execute_command_in_server(self.endpoint, "mshop moneyTake " + self.uuid + " " + str(amount))
         return RequestResponse(result)
 
+    # uuid tools
     def get_uuid_formatted(self):
         return self.uuid.replace("-", "").lower()
 

@@ -66,8 +66,6 @@ class ShopInformationMethod:
                 result["menu_info"]["trade_item_count"] = shop.get_item_count(player)
 
                 result["sign_info"] = shop.get_sign_info()
-
-
                 return "success", result
             except Exception as e:
                 traceback.print_exc()

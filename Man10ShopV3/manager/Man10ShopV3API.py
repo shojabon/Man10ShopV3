@@ -32,8 +32,11 @@ class Man10ShopV3API:
 
     def get_shop(self, shop_id) -> Optional[Shop]:
         # if shop_id in self.shops:
-        #     return self.shops[shop_id]
-        shop_object = self.main.mongo["man10shop_v3"]["shops"].find_one({"shopId": shop_id})
+        #     shop = self.shops[shop_id]
+        #     if shop.delete_function.is_deleted():
+        #         return None
+        #     return shop
+        shop_object = self.main.mongo["man10shop_v3"]["shops"].find_one({"shopId": shop_id, "delete.deleted": False})
         if shop_object is None:
             return None
         del shop_object["_id"]

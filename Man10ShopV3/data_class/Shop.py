@@ -7,13 +7,22 @@ import humps
 from Man10ShopV3.data_class.Player import Player
 from Man10ShopV3.data_class.ShopFunction import ShopFunction
 from Man10ShopV3.shop_functions.MoneyFunction import MoneyFunction
+from Man10ShopV3.shop_functions.allowed_to_use.DisabledFromFunction import DisabledFromFunction
+from Man10ShopV3.shop_functions.allowed_to_use.EnabledFromFunction import EnabledFromFunction
+from Man10ShopV3.shop_functions.tradeAmount.LimitUseFunction import LimitUseFunction
+from Man10ShopV3.shop_functions.allowed_to_use.WeekDayToggleFunction import WeekDayToggleFunction
+from Man10ShopV3.shop_functions.general.DeleteShopFunction import DeleteShopFunction
 from Man10ShopV3.shop_functions.general.NameFunction import NameFunction
 from Man10ShopV3.shop_functions.PermissionFunction import PermissionFunction
 from Man10ShopV3.shop_functions.general.PriceFunction import PriceFunction
 from Man10ShopV3.shop_functions.SignFunction import SignFunction
-from Man10ShopV3.shop_functions.StorageFunction import StorageFunction
+from Man10ShopV3.shop_functions.general.ShopEnabledFunction import ShopEnabledFunction
+from Man10ShopV3.shop_functions.storage.StorageCapFunction import StorageCapFunction
+from Man10ShopV3.shop_functions.storage.StorageFunction import StorageFunction
 from Man10ShopV3.shop_functions.TargetItemFunction import TargetItemFunction
 from Man10ShopV3.shop_functions.general.CategoryFunction import CategoryFunction
+from Man10ShopV3.shop_functions.storage.StorageRefillFunction import StorageRefillFunction
+from Man10ShopV3.shop_functions.tradeAmount.CoolDownFunction import CoolDownFunction
 from utils.JsonSchemaWrapper import merge_dictionaries
 from utils.JsonTools import flatten_dict, unflatten_dict
 
@@ -22,8 +31,8 @@ if TYPE_CHECKING:
 
 from Man10ShopV3.data_class.OrderRequest import OrderRequest
 
-class Shop(object):
 
+class Shop(object):
     api: Man10ShopV3API = None
 
     variable_permissions = {}
@@ -39,12 +48,32 @@ class Shop(object):
 
         self.money_function: MoneyFunction = self.register_function("money", MoneyFunction())
         self.storage_function: StorageFunction = self.register_function("storage", StorageFunction())
-        self.price_function: PriceFunction = self.register_function("price", PriceFunction())
         self.target_item_function: TargetItemFunction = self.register_function("target_item", TargetItemFunction())
         self.permission_function: PermissionFunction = self.register_function("permission", PermissionFunction())
+
+        # general
+
         self.name_function: NameFunction = self.register_function("name", NameFunction())
         self.sign_function: SignFunction = self.register_function("sign", SignFunction())
         self.category_function: CategoryFunction = self.register_function("category", CategoryFunction())
+        self.delete_function: DeleteShopFunction = self.register_function("delete", DeleteShopFunction())
+        self.price_function: PriceFunction = self.register_function("price", PriceFunction())
+        self.shop_enabled_function: ShopEnabledFunction = self.register_function("shop_enabled", ShopEnabledFunction())
+
+        # allowed to use
+        self.disabled_from_function: DisabledFromFunction = self.register_function("disabled_from",
+                                                                                   DisabledFromFunction())
+        self.enabled_from_function: EnabledFromFunction = self.register_function("enabled_from", EnabledFromFunction())
+        self.limit_use_function: LimitUseFunction = self.register_function("limit_use", LimitUseFunction())
+        self.weekday_toggle: WeekDayToggleFunction = self.register_function("weekday_toggle", WeekDayToggleFunction())
+
+        # storage
+        self.storage_cap_function: StorageCapFunction = self.register_function("storage_cap", StorageCapFunction())
+        self.storage_refill_function: StorageRefillFunction = self.register_function("storage_refill",
+                                                                                     StorageRefillFunction())
+
+        # trade amount
+        self.cool_down_function: CoolDownFunction = self.register_function("cool_down", CoolDownFunction())
 
         self.register_queue_callback("shop.order", self.accept_order)
 
@@ -110,6 +139,9 @@ class Shop(object):
     def get_shop_type(self):
         return self.get_variable("shop_type")
 
+    def set_shop_type(self, shop_type: str):
+        return self.set_variable("shop_type", shop_type, True)
+
     def get_shop_id(self):
         return self.get_variable("shop_id")
 
@@ -127,15 +159,18 @@ class Shop(object):
         order.player = data["player"]
         self.perform_action(order)
 
-
     # shop functions
 
     def allowed_to_use_shop(self, order: OrderRequest):
         for function in self.functions.values():
             function: ShopFunction = function
-            if not function.is_function_enabled(): continue
-            if self.get_shop_type() not in function.allowed_shop_type: continue
-            if not function.is_allowed_to_use_shop(order): return False
+            if not function.is_function_enabled():
+                continue
+            if len(function.allowed_shop_type) != 0 and self.get_shop_type() not in function.allowed_shop_type:
+                continue
+            if not function.is_allowed_to_use_shop(order):
+                print("out", function)
+                return False
         return True
 
     def perform_action(self, order: OrderRequest):
@@ -145,13 +180,13 @@ class Shop(object):
         for function in self.functions.values():
             function: ShopFunction = function
             if not function.is_function_enabled(): continue
-            if self.get_shop_type() not in function.allowed_shop_type: continue
+            if len(function.allowed_shop_type) != 0 and self.get_shop_type() not in function.allowed_shop_type: continue
             if not function.perform_action(order): return False
 
         for function in self.functions.values():
             function: ShopFunction = function
             if not function.is_function_enabled(): continue
-            if self.get_shop_type() not in function.allowed_shop_type: continue
+            if len(function.allowed_shop_type) != 0 and self.get_shop_type() not in function.allowed_shop_type: continue
             function.after_perform_action(order)
 
         order.player.send_message("成功しました")
@@ -166,7 +201,7 @@ class Shop(object):
         for function in self.functions.values():
             function: ShopFunction = function
             if not function.is_function_enabled(): continue
-            if self.get_shop_type() not in function.allowed_shop_type: continue
+            if len(function.allowed_shop_type) != 0 and self.get_shop_type() not in function.allowed_shop_type: continue
             count = function.item_count(player)
             if count is None: continue
             if count < result:
@@ -179,7 +214,7 @@ class Shop(object):
         for function in self.functions.values():
             function: ShopFunction = function
             if not function.is_function_enabled(): continue
-            if self.get_shop_type() not in function.allowed_shop_type: continue
+            if len(function.allowed_shop_type) != 0 and self.get_shop_type() not in function.allowed_shop_type: continue
             info = function.menu_info(player)
             if info is None: continue
             result = merge_dictionaries(result, info)
@@ -201,9 +236,8 @@ class Shop(object):
         for function in self.functions.values():
             function: ShopFunction = function
             if not function.is_function_enabled(): continue
-            if self.get_shop_type() not in function.allowed_shop_type: continue
+            if len(function.allowed_shop_type) != 0 and self.get_shop_type() not in function.allowed_shop_type: continue
             info = function.sign_information(result)
             if info is None: continue
             result = info
         return result
-
