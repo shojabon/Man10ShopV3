@@ -10,7 +10,17 @@ class PermissionFunction(ShopFunction):
         self.set_variable("users", {})
 
     def set_permission(self, player: Player, permission: str):
-        self.set("users." + player.get_uuid_formatted(), permission)
+        default = {
+            "name": player.name,
+            "uuid": player.uuid,
+            "permission": permission,
+            "notify": True
+        }
+        users = self.get("users")
+        if player.get_uuid_formatted() in users:
+            default = users[player.get_uuid_formatted()]
+
+        self.set("users." + player.get_uuid_formatted(), default)
 
     def remove_user(self, player: Player):
         permission_list = self.get("users")
@@ -25,13 +35,13 @@ class PermissionFunction(ShopFunction):
         result = permission_list.get(player.get_uuid_formatted())
         if result is None:
             return "NONE"
-        return result
+        return result["permission"]
     def get_permission_level(self, permission):
         permission_level = 0
         if permission == "OWNER": permission_level = 10
-        if permission == "MODERATOR": permission_level = 10
-        if permission == "ACCOUNTANT": permission_level = 10
-        if permission == "STORAGE_ACCESS": permission_level = 10
+        if permission == "MODERATOR": permission_level = 9
+        if permission == "ACCOUNTANT": permission_level = 7
+        if permission == "STORAGE_ACCESS": permission_level = 6
         return permission_level
 
     def has_permission_at_least(self, target_permission: str, owning_permission: str):

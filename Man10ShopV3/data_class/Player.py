@@ -67,17 +67,12 @@ class Player(object):
     def item_give(self, item_base64, amount: int):
         command = "mshop itemGive " + self.uuid + " " + item_base64 + " " + str(amount)
         result = self.execute_command_in_server(command)
-        if result == "success":
-            return True
-        return False
+        return RequestResponse(result)
 
     def item_take(self, item_base64, amount: int):
         command = "mshop itemTake " + self.uuid + " " + item_base64 + " " + str(amount)
         result = self.execute_command_in_server(command)
-        if result == "success":
-            return True
-        return False
-
+        return RequestResponse(result)
     def execute_command_in_server(self, command):
         result = self.http_request("/server/exec", "POST", {
             "command": command

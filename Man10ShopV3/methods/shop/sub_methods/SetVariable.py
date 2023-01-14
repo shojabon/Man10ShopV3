@@ -43,7 +43,7 @@ class SetVariable:
         @flask_json_schema(self.schema)
         def variable_set(json_body: dict):
             try:
-                owning_permission = "NONE"
+                owning_permission = "OWNER"
                 required_permission = "MODERATOR"
                 shop = self.methods.main.api.get_shop(json_body["shop_id"])
                 if shop is None:
