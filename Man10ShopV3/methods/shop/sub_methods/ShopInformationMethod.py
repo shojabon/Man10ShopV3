@@ -53,7 +53,7 @@ class ShopInformationMethod:
 
                 shop = self.methods.main.api.get_shop(shop_id)
                 if shop is None:
-                    return "shop_invalid",
+                    return "shop_invalid"
                 result = shop.get_export_data()
                 player = None
 

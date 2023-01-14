@@ -11,3 +11,12 @@ class DeleteShopFunction(ShopFunction):
 
     def is_deleted(self):
         return self.get("deleted")
+
+    def sign_information(self, sign_info: list) -> list:
+        if self.is_deleted():
+            return [
+                " ",
+                " ",
+                " ",
+                " ",
+            ]
