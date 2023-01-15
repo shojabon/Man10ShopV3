@@ -7,7 +7,7 @@ from Man10ShopV3.data_class.ShopFunction import ShopFunction
 
 
 class RandomPriceFunction(ShopFunction):
-    allowed_shop_type = []
+    allowed_shop_type = ["BUY", "SELL"]
 
     def on_function_init(self):
         self.set_variable("prices", [])

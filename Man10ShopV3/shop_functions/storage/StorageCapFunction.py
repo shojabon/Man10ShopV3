@@ -21,14 +21,11 @@ class StorageCapFunction(ShopFunction):
         return self.get_size() != 0
 
     def item_count(self, player: Player) -> Optional[int]:
-        if self.shop.get_shop_type() == "SELL":
-            return self.get_size() - self.shop.storage_function.get_item_count()
-        return super().item_count(player)
+        return self.get_size() - self.shop.storage_function.get_item_count()
 
     def is_allowed_to_use_shop(self, order: OrderRequest) -> bool:
-        if self.shop.get_shop_type() == "SELL":
-            if self.shop.storage_function.get_item_count() + order.amount > self.get_size() != 0:
-                order.player.warn_message("現在このショップは買い取りをしていません")
-                return False
+        if self.shop.storage_function.get_item_count() + order.amount > self.get_size() != 0:
+            order.player.warn_message("現在このショップは買い取りをしていません")
+            return False
         return True
 
