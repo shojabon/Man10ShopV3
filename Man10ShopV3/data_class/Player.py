@@ -23,17 +23,15 @@ class Player(object):
 
     name: str = None
     uuid: str = None
-    balance: int = 0
+    ip_address: str = None
 
     server: str = None
-
-    inventory: dict[str, ItemStack] = None
 
     def load_from_json(self, data: dict, main: Man10ShopV3):
         self.name = data.get("name")
         self.main = main
         self.uuid = data.get("uuid")
-        self.balance = data.get("balance")
+        self.ip_address = data.get("ip_address")
         self.server = data.get("server")
         if self.server is None:
             self.server = "man10"
@@ -45,7 +43,8 @@ class Player(object):
         data = {
             "uuid": self.uuid,
             "name": self.name,
-            "server": self.server
+            "server": self.server,
+            "ip_address": self.ip_address
         }
         return data
 

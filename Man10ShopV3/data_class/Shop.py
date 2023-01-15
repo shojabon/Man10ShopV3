@@ -11,6 +11,7 @@ from Man10ShopV3.shop_functions.MoneyFunction import MoneyFunction
 from Man10ShopV3.shop_functions.allowed_to_use.DisabledFromFunction import DisabledFromFunction
 from Man10ShopV3.shop_functions.allowed_to_use.EnabledFromFunction import EnabledFromFunction
 from Man10ShopV3.shop_functions.general.SecretPriceModeFunction import SecretPriceModeFunction
+from Man10ShopV3.shop_functions.tradeAmount.IpLimitFunction import IpLimitFunction
 from Man10ShopV3.shop_functions.tradeAmount.LimitUseFunction import LimitUseFunction
 from Man10ShopV3.shop_functions.allowed_to_use.WeekDayToggleFunction import WeekDayToggleFunction
 from Man10ShopV3.shop_functions.general.DeleteShopFunction import DeleteShopFunction
@@ -87,6 +88,9 @@ class Shop(object):
                                                                                                PerMinuteCoolDownFunction())
         self.total_per_minute_cool_down_function: TotalPerMinuteCoolDownFunction = self.register_function(
             "total_per_minute_cool_down", TotalPerMinuteCoolDownFunction())
+
+        self.ip_limit_function: IpLimitFunction = self.register_function(
+            "ip_limit_function", IpLimitFunction())
 
         self.register_queue_callback("shop.order", self.accept_order)
 
@@ -221,7 +225,7 @@ class Shop(object):
             count = function.item_count(player)
             if count is None: continue
             if count < result:
-                print(function, count)
+                print("item count", function, count)
                 result = count
 
         return abs(result)

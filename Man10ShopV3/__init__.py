@@ -3,6 +3,7 @@ import time
 import traceback
 from threading import Thread
 
+import humps
 from flask import Flask
 from pymongo import MongoClient
 
@@ -19,13 +20,13 @@ class Man10ShopV3:
             try:
                 completed_task = []
                 result = self.mongo["man10shop_v3"]["queue"].find({}).limit(1)
-                result = [x for x in result]
+                result = [humps.decamelize(x) for x in result]
                 for request in result:
                     if "player" in request:
                         player_data = request["player"]
                         request["player"] = Player().load_from_json(player_data, self)
                     completed_task.append(request["_id"])
-                    shop = self.api.get_shop(request["shopId"])
+                    shop = self.api.get_shop(request["shop_id"])
                     if shop is None:
                         continue
 
