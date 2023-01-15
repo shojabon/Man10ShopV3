@@ -61,7 +61,6 @@ class ListShopsMethod:
                         "itemCount": shop.storage_function.get_item_count(),
                         "category": shop.category_function.get_category()
                     })
-
                 results = sorted(results, key=lambda x: x["category"] + "-" + x["name"], reverse=False)
                 return "success", results
             except Exception as e:

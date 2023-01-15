@@ -10,6 +10,7 @@ from Man10ShopV3.data_class.ShopFunction import ShopFunction
 from Man10ShopV3.shop_functions.MoneyFunction import MoneyFunction
 from Man10ShopV3.shop_functions.allowed_to_use.DisabledFromFunction import DisabledFromFunction
 from Man10ShopV3.shop_functions.allowed_to_use.EnabledFromFunction import EnabledFromFunction
+from Man10ShopV3.shop_functions.general.SecretPriceModeFunction import SecretPriceModeFunction
 from Man10ShopV3.shop_functions.tradeAmount.LimitUseFunction import LimitUseFunction
 from Man10ShopV3.shop_functions.allowed_to_use.WeekDayToggleFunction import WeekDayToggleFunction
 from Man10ShopV3.shop_functions.general.DeleteShopFunction import DeleteShopFunction
@@ -25,6 +26,7 @@ from Man10ShopV3.shop_functions.general.CategoryFunction import CategoryFunction
 from Man10ShopV3.shop_functions.storage.StorageRefillFunction import StorageRefillFunction
 from Man10ShopV3.shop_functions.tradeAmount.CoolDownFunction import CoolDownFunction
 from Man10ShopV3.shop_functions.tradeAmount.PerMinuteCoolDownFunction import PerMinuteCoolDownFunction
+from Man10ShopV3.shop_functions.tradeAmount.SingleTransactionModeFunction import SingleTransactionModeFunction
 from Man10ShopV3.shop_functions.tradeAmount.TotalPerMinuteCoolDownFunction import TotalPerMinuteCoolDownFunction
 from utils.JsonSchemaWrapper import merge_dictionaries
 from utils.JsonTools import flatten_dict, unflatten_dict
@@ -57,6 +59,8 @@ class Shop(object):
         # general
 
         self.name_function: NameFunction = self.register_function("name", NameFunction())
+        self.secret_price_mode_function: SecretPriceModeFunction = self.register_function("secret_price_mode",
+                                                                                          SecretPriceModeFunction())
         self.sign_function: SignFunction = self.register_function("sign", SignFunction())
         self.category_function: CategoryFunction = self.register_function("category", CategoryFunction())
         self.delete_function: DeleteShopFunction = self.register_function("delete", DeleteShopFunction())
@@ -77,8 +81,12 @@ class Shop(object):
 
         # trade amount
         self.cool_down_function: CoolDownFunction = self.register_function("cool_down", CoolDownFunction())
-        self.per_minute_cool_down_function: PerMinuteCoolDownFunction = self.register_function("per_minute_cool_down", PerMinuteCoolDownFunction())
-        self.total_per_minute_cool_down_function: TotalPerMinuteCoolDownFunction = self.register_function("total_per_minute_cool_down", TotalPerMinuteCoolDownFunction())
+        self.single_transaction_mode: SingleTransactionModeFunction = self.register_function("single_transaction_mode",
+                                                                                             SingleTransactionModeFunction())
+        self.per_minute_cool_down_function: PerMinuteCoolDownFunction = self.register_function("per_minute_cool_down",
+                                                                                               PerMinuteCoolDownFunction())
+        self.total_per_minute_cool_down_function: TotalPerMinuteCoolDownFunction = self.register_function(
+            "total_per_minute_cool_down", TotalPerMinuteCoolDownFunction())
 
         self.register_queue_callback("shop.order", self.accept_order)
 
@@ -248,7 +256,9 @@ class Shop(object):
             if len(function.allowed_shop_type) != 0 and self.get_shop_type() not in function.allowed_shop_type: continue
             info = function.sign_information(result)
             if info is None: continue
-            result = info
+            for x in range(len(result)):
+                if info[x] == "" or info[x] is None: continue
+                result[x] = info[x]
         return result
 
     def get_log_data(self, order: OrderRequest):
