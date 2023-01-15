@@ -17,3 +17,12 @@ class ShopEnabledFunction(ShopFunction):
             order.player.warn_message("現在このショップは停止しています")
             return False
         return True
+
+    def sign_information(self, sign_info: list) -> list:
+        if not self.is_enabled():
+            return [
+                "",
+                "§c取引停止中",
+                "",
+                ""
+            ]

@@ -45,3 +45,8 @@ class PriceFunction(ShopFunction):
                 return False
         return True
 
+    def log_data(self, order: OrderRequest) -> dict:
+        return {
+            "total_price": order.amount * self.get_price()
+        }
+

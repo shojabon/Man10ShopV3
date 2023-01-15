@@ -6,7 +6,7 @@ from Man10ShopV3.data_class.ShopFunction import ShopFunction
 
 
 class StorageCapFunction(ShopFunction):
-    allowed_shop_type = []
+    allowed_shop_type = ["SELL"]
 
     # variables
     def on_function_init(self):
@@ -17,9 +17,12 @@ class StorageCapFunction(ShopFunction):
 
     # =========
 
+    def is_function_enabled(self) -> bool:
+        return self.get_size() != 0
+
     def item_count(self, player: Player) -> Optional[int]:
         if self.shop.get_shop_type() == "SELL":
-            return self.get_size()
+            return self.get_size() - self.shop.storage_function.get_item_count()
         return super().item_count(player)
 
     def is_allowed_to_use_shop(self, order: OrderRequest) -> bool:

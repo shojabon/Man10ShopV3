@@ -67,3 +67,5 @@ class ShopFunction(object):
 
     def sign_information(self, sign_info: list) -> list:
         pass
+
+    def log_data(self, order: OrderRequest) -> dict: pass

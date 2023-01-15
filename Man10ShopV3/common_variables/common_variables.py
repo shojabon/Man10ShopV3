@@ -14,7 +14,7 @@ player_schema = {
         "balance": {
             "type": "integer"
         },
-        "endpoint": {
+        "server": {
             "type": "string"
         },
         "inventory": {

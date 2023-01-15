@@ -14,6 +14,7 @@ from utils.JsonTools import flatten_dict
 from utils.MatResponseWrapper import get_error_message
 
 if TYPE_CHECKING:
+    from Man10ShopV3.data_class.ShopFunction import ShopFunction
     from Man10ShopV3 import Man10ShopV3
 
 
@@ -24,7 +25,7 @@ class Player(object):
     uuid: str = None
     balance: int = 0
 
-    endpoint: str = None
+    server: str = None
 
     inventory: dict[str, ItemStack] = None
 
@@ -33,16 +34,24 @@ class Player(object):
         self.main = main
         self.uuid = data.get("uuid")
         self.balance = data.get("balance")
-        self.endpoint = data.get("endpoint")
-        if self.endpoint is None:
-            self.endpoint = "man10"
+        self.server = data.get("server")
+        if self.server is None:
+            self.server = "man10"
 
         self.inventory = data.get("inventory")
         return self
 
+    def get_json(self):
+        data = {
+            "uuid": self.uuid,
+            "name": self.name,
+            "server": self.server
+        }
+        return data
+
     # ======= data store =========
-    def set_data(self, shop_id: str, key:str, data):
-        key = shop_id + "." + key
+    def set_data(self, shop_function: ShopFunction, key: str, data):
+        key = shop_function.shop.get_shop_id() + "." + shop_function.config_prefix + "." + key
         if data is None:
             self.main.mongo["man10shop_v3"]["player_data"].update_one({
                 "uuid": self.uuid
@@ -50,43 +59,47 @@ class Player(object):
             return True
         else:
             result = self.main.mongo["man10shop_v3"]["player_data"].update_one({
-                "shopId": shop_id,
-            }, {humps.camelize(key): data})
+                "uuid": self.uuid,
+            }, {"$set": {humps.camelize(key): data}}, upsert=True)
             if result.raw_result["ok"] != 1:
                 return False
             return True
 
-    def get_data(self, shop_id: str, key: str):
+    def get_data(self, shop_function: ShopFunction, key: str, default = None):
         result = self.main.mongo["man10shop_v3"]["player_data"].find_one({"uuid": self.uuid})
         if result is None:
+            if default is not None:
+                return default
             return None
-        key = shop_id + "." + key
+        key = shop_function.shop.get_shop_id() + "." + shop_function.config_prefix + "." + key
         key = humps.camelize(key)
-        result = flatten_dict(result)
+        result = flatten_dict(result, max_depth=2)
         if key not in result:
+            if default is not None:
+                return default
             return None
         return result[key]
 
     # ======= minecraft functions ========
     def send_message(self, message):
-        return self.main.api.http_request(self.endpoint, "/chat/tell", "POST", {
+        return self.main.api.http_request(self.server, "/chat/tell", "POST", {
             "message": message,
             "playerUuid": self.uuid
         })
 
     def item_give(self, item_base64, amount: int):
         command = "mshop itemGive " + self.uuid + " " + item_base64 + " " + str(amount)
-        result = self.main.api.execute_command_in_server(self.endpoint, command)
+        result = self.main.api.execute_command_in_server(self.server, command)
         return RequestResponse(result)
 
     def item_take(self, item_base64, amount: int):
         command = "mshop itemTake " + self.uuid + " " + item_base64 + " " + str(amount)
-        result = self.main.api.execute_command_in_server(self.endpoint, command)
+        result = self.main.api.execute_command_in_server(self.server, command)
         return RequestResponse(result)
 
     def item_check(self, item_base64, amount: int):
         command = "mshop itemCheck " + self.uuid + " " + item_base64 + " " + str(amount)
-        result = self.main.api.execute_command_in_server(self.endpoint, command)
+        result = self.main.api.execute_command_in_server(self.server, command)
         return RequestResponse(result)
 
     def success_message(self, message: str):
@@ -96,7 +109,7 @@ class Player(object):
         return self.send_message("§6[§eMan10Shop§dV3§6]§c§l" + message)
 
     def get_player_data(self) -> dict:
-        return self.main.api.http_request(self.endpoint, "/players/" + str(self.uuid), "GET")
+        return self.main.api.http_request(self.server, "/players/" + str(self.uuid), "GET")
 
     # economy
 
@@ -105,11 +118,11 @@ class Player(object):
         return player_data["balance"]
 
     def give_money(self, amount: float):
-        result = self.main.api.execute_command_in_server(self.endpoint, "mshop moneyGive " + self.uuid + " " + str(amount))
+        result = self.main.api.execute_command_in_server(self.server, "mshop moneyGive " + self.uuid + " " + str(amount))
         return RequestResponse(result)
 
     def take_money(self, amount: float):
-        result = self.main.api.execute_command_in_server(self.endpoint, "mshop moneyTake " + self.uuid + " " + str(amount))
+        result = self.main.api.execute_command_in_server(self.server, "mshop moneyTake " + self.uuid + " " + str(amount))
         return RequestResponse(result)
 
     # uuid tools

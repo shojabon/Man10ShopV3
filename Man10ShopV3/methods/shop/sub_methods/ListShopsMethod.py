@@ -48,6 +48,7 @@ class ListShopsMethod:
                 results = []
                 for shop in shops:
                     permission = shop.permission_function.get_permission(player)
+                    if shop.delete_function.is_deleted(): continue
                     if permission is None:
                         permission = "ERROR"
                     results.append({

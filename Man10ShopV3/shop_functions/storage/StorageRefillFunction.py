@@ -13,7 +13,7 @@ class StorageRefillFunction(ShopFunction):
     def on_function_init(self):
         self.set_variable("amount", 0)
         self.set_variable("minutes", 0)
-        self.set_variable("last_refill_time", 0)
+        self.set_variable("last_refill_time", -1)
         self.set_variable("item_left", 0)
 
     def get_size(self):
@@ -21,6 +21,9 @@ class StorageRefillFunction(ShopFunction):
 
     def get_item_left(self):
         return self.get("item_left")
+
+    def set_item_left(self, value: int):
+        return self.set("item_left", value)
 
     def get_last_refill_time(self) -> int:
         return self.get("last_refill_time")
@@ -50,10 +53,14 @@ class StorageRefillFunction(ShopFunction):
         return datetime.datetime.fromtimestamp(self.get_last_refill_time() + self.get_minutes() * 60)
 
     # =========
+    def is_function_enabled(self) -> bool:
+        if self.get_minutes() == 0 or self.get_amount() == 0 or self.get_last_refill_time() == -1:
+            return False
+        return True
 
     def item_count(self, player: Player) -> Optional[int]:
         if self.shop.is_admin(): return -self.get_item_left()
-        return self.get_item_left()
+        return self.transactions_left()
 
     def is_allowed_to_use_shop(self, order: OrderRequest) -> bool:
         if self.transactions_left() < order.amount:
@@ -62,8 +69,12 @@ class StorageRefillFunction(ShopFunction):
                 return False
             if self.shop.get_shop_type() == "SELL":
                 order.player.warn_message(
-                    "このショップは買い取りを停止しています 次回の売却は " + self.get_next_refill_time().strftime("yyyy-MM-dd HH:mm:ss"))
+                    "このショップは買い取りを停止しています 次回の売却は " + self.get_next_refill_time().strftime("%Y-%m-%d %H:%M:%S"))
             else:
                 order.player.warn_message(
-                    "このショップは品切れです 次回の入荷は " + self.get_next_refill_time().strftime("yyyy-MM-dd HH:mm:ss"))
+                    "このショップは品切れです 次回の入荷は " + self.get_next_refill_time().strftime("%Y-%m-%d %H:%M:%S"))
             return False
+        return True
+
+    def after_perform_action(self, order: OrderRequest):
+        self.set_item_left(self.get_item_left() - order.amount)

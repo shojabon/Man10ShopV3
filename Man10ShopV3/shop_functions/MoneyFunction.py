@@ -73,13 +73,13 @@ class MoneyFunction(ShopFunction):
     def item_count(self, player: Player) -> int:
         if self.shop.is_admin(): return 0
         if self.shop.get_shop_type() == "SELL":
-            if self.shop.get_price() == 0: return super().item_count(player)
-            return self.get_money() // self.shop.get_price()
+            if self.shop.price_function.get_price() == 0: return super().item_count(player)
+            return self.get_money() // self.shop.price_function.get_price()
         return super().item_count(player)
 
     def is_allowed_to_use_shop(self, order: OrderRequest) -> bool:
         if self.shop.get_shop_type() == "SELL":
-            if self.get_money() < self.shop.get_price() and not self.shop.is_admin():
+            if self.get_money() < self.shop.price_function.get_price() and not self.shop.is_admin():
                 order.player.warn_message("ショップの残金不足してます")
                 return False
         return True

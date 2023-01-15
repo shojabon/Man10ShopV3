@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import datetime
 import traceback
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Callable, Any
 import humps
 
 from Man10ShopV3.data_class.Player import Player
@@ -23,6 +24,7 @@ from Man10ShopV3.shop_functions.TargetItemFunction import TargetItemFunction
 from Man10ShopV3.shop_functions.general.CategoryFunction import CategoryFunction
 from Man10ShopV3.shop_functions.storage.StorageRefillFunction import StorageRefillFunction
 from Man10ShopV3.shop_functions.tradeAmount.CoolDownFunction import CoolDownFunction
+from Man10ShopV3.shop_functions.tradeAmount.PerMinuteCoolDownFunction import PerMinuteCoolDownFunction
 from utils.JsonSchemaWrapper import merge_dictionaries
 from utils.JsonTools import flatten_dict, unflatten_dict
 
@@ -74,6 +76,7 @@ class Shop(object):
 
         # trade amount
         self.cool_down_function: CoolDownFunction = self.register_function("cool_down", CoolDownFunction())
+        self.per_minute_cool_down_function: PerMinuteCoolDownFunction = self.register_function("per_minute_cool_down", PerMinuteCoolDownFunction())
 
         self.register_queue_callback("shop.order", self.accept_order)
 
@@ -84,7 +87,7 @@ class Shop(object):
     def get_export_data(self):
         return humps.camelize(self.data)
 
-    def register_function(self, prefix: str, function: ShopFunction):
+    def register_function(self, prefix: str, function: ShopFunction) -> Any:
         function.shop = self
         function.config_prefix = prefix
 
@@ -159,6 +162,8 @@ class Shop(object):
         order.player = data["player"]
         self.perform_action(order)
 
+        self.log_order(order)
+
     # shop functions
 
     def allowed_to_use_shop(self, order: OrderRequest):
@@ -205,6 +210,7 @@ class Shop(object):
             count = function.item_count(player)
             if count is None: continue
             if count < result:
+                print(function, count)
                 result = count
 
         return abs(result)
@@ -241,3 +247,25 @@ class Shop(object):
             if info is None: continue
             result = info
         return result
+
+    def get_log_data(self, order: OrderRequest):
+        result = {}
+        for function in self.functions.values():
+            function: ShopFunction = function
+            if not function.is_function_enabled(): continue
+            if len(function.allowed_shop_type) != 0 and self.get_shop_type() not in function.allowed_shop_type: continue
+            info = function.log_data(order)
+            if info is None: continue
+            result = merge_dictionaries(result, info)
+        return result
+
+    def log_order(self, order: OrderRequest):
+        log_object = {
+            "shop_id": self.get_shop_id(),
+            "shop_type": self.get_shop_type(),
+            "player": order.player.get_json(),
+            "order_data": self.get_log_data(order),
+            "time": datetime.datetime.now()
+        }
+        log_object = humps.camelize(log_object)
+        self.api.main.mongo["man10shop_v3"]["trade_log"].insert_one(log_object)

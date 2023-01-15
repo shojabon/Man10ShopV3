@@ -51,3 +51,8 @@ class TargetItemFunction(ShopFunction):
                 return False
         return True
 
+    def log_data(self, order: OrderRequest) -> dict:
+        return {
+            "amount": order.amount
+        }
+

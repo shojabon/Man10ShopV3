@@ -52,6 +52,14 @@ class Man10ShopV3API:
             "name": {"name": name},
             "admin": admin,
         }, self)
+
+        # temp
+        shop.set_shop_type("SELL")
+        shop.money_function.set_money(100000)
+        shop.storage_function.set_item_count(150)
+
+        ##
+
         shop.permission_function.set_permission(owner, "OWNER")
         self.main.mongo["man10shop_v3"]["shops"].update_one({"shopId": shop.get_shop_id()}, {"$set": shop.get_export_data()}, upsert=True)
 
@@ -95,9 +103,7 @@ class Man10ShopV3API:
             return None
 
     def execute_command_in_server(self, endpoint, command):
-        print("executing command", command)
         result = self.main.api.http_request(endpoint, "/server/exec", "POST", {
             "command": command
         }, False)
         return result
-
