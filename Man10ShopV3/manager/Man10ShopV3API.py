@@ -31,9 +31,9 @@ class Man10ShopV3API:
         return query["shopId"]
 
     def get_shop(self, shop_id) -> Optional[Shop]:
-        # if shop_id in self.shops:
-        #     shop = self.shops[shop_id]
-        #     return shop
+        if shop_id in self.shops:
+            shop = self.shops[shop_id]
+            return shop
         shop_object = self.main.mongo["man10shop_v3"]["shops"].find_one({"shopId": shop_id})
         if shop_object is None:
             return None
@@ -103,6 +103,7 @@ class Man10ShopV3API:
             return None
 
     def execute_command_in_server(self, endpoint, command):
+        print("executing command", command)
         result = self.main.api.http_request(endpoint, "/server/exec", "POST", {
             "command": command
         }, False)

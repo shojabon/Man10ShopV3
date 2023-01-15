@@ -69,3 +69,5 @@ class ShopFunction(object):
         pass
 
     def log_data(self, order: OrderRequest) -> dict: pass
+
+    def per_minute_execution_task(self): pass

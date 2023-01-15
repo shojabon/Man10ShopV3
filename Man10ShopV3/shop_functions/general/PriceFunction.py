@@ -11,6 +11,9 @@ class PriceFunction(ShopFunction):
     def get_price(self):
         return self.get("price")
 
+    def set_price(self, price: int):
+        return self.set("price", price)
+
     # =========
 
     def perform_action(self, order: OrderRequest) -> bool:

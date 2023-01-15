@@ -39,6 +39,15 @@ class Man10ShopV3:
                 traceback.print_exc()
                 continue
 
+    def process_per_minute_execution_task(self):
+        while self.running:
+            try:
+                for shop in self.api.shops.values():
+                    shop.execute_per_minute_execution_task()
+            except Exception:
+                traceback.print_exc()
+            time.sleep(60)
+
     def __init__(self):
         # variables
         self.flask = Flask(__name__)
@@ -61,6 +70,7 @@ class Man10ShopV3:
         self.shop_method = ShopMethods(self)
 
         Thread(target=self.process_queue).start()
+        Thread(target=self.process_per_minute_execution_task).start()
 
         # self.shop = InstanceMethod(self)
         player = Player()

@@ -10,6 +10,7 @@ from Man10ShopV3.data_class.ShopFunction import ShopFunction
 from Man10ShopV3.shop_functions.MoneyFunction import MoneyFunction
 from Man10ShopV3.shop_functions.allowed_to_use.DisabledFromFunction import DisabledFromFunction
 from Man10ShopV3.shop_functions.allowed_to_use.EnabledFromFunction import EnabledFromFunction
+from Man10ShopV3.shop_functions.general.RandomPriceFunction import RandomPriceFunction
 from Man10ShopV3.shop_functions.general.SecretPriceModeFunction import SecretPriceModeFunction
 from Man10ShopV3.shop_functions.tradeAmount.IpLimitFunction import IpLimitFunction
 from Man10ShopV3.shop_functions.tradeAmount.LimitUseFunction import LimitUseFunction
@@ -67,6 +68,7 @@ class Shop(object):
         self.delete_function: DeleteShopFunction = self.register_function("delete", DeleteShopFunction())
         self.price_function: PriceFunction = self.register_function("price", PriceFunction())
         self.shop_enabled_function: ShopEnabledFunction = self.register_function("shop_enabled", ShopEnabledFunction())
+        self.random_price_function: RandomPriceFunction = self.register_function("random_price", RandomPriceFunction())
 
         # allowed to use
         self.disabled_from_function: DisabledFromFunction = self.register_function("disabled_from",
@@ -90,7 +92,7 @@ class Shop(object):
             "total_per_minute_cool_down", TotalPerMinuteCoolDownFunction())
 
         self.ip_limit_function: IpLimitFunction = self.register_function(
-            "ip_limit_function", IpLimitFunction())
+            "ip_limit", IpLimitFunction())
 
         self.register_queue_callback("shop.order", self.accept_order)
 
@@ -191,6 +193,16 @@ class Shop(object):
             if not function.is_allowed_to_use_shop(order):
                 print("out", function)
                 return False
+        return True
+
+    def execute_per_minute_execution_task(self):
+        for function in self.functions.values():
+            function: ShopFunction = function
+            if not function.is_function_enabled():
+                continue
+            if len(function.allowed_shop_type) != 0 and self.get_shop_type() not in function.allowed_shop_type:
+                continue
+            function.per_minute_execution_task()
         return True
 
     def perform_action(self, order: OrderRequest):
