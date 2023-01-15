@@ -43,25 +43,23 @@ class Man10ShopV3API:
         self.shops[shop_id] = shop
         return self.shops[shop_id]
 
-    def create_shop(self, owner: Player, name: str, price: int, shop_type: str, admin: bool):
-        shop = Shop()
-        shop.from_json({
-            "shopId": str(uuid.uuid1()),
-            "shopType": shop_type,
-            "price": {"price": price},
-            "name": {"name": name},
-            "admin": admin,
-        }, self)
-
-        # temp
-        shop.set_shop_type("SELL")
-        shop.money_function.set_money(100000)
-        shop.storage_function.set_item_count(150)
-
-        ##
-
-        shop.permission_function.set_permission(owner, "OWNER")
-        self.main.mongo["man10shop_v3"]["shops"].update_one({"shopId": shop.get_shop_id()}, {"$set": shop.get_export_data()}, upsert=True)
+    def create_shop(self, owner: Player, shop_type: str, name: str, admin: bool) -> bool:
+        try:
+            shop = Shop()
+            shop.from_json({
+                "shopId": str(uuid.uuid1()),
+                "shopType": shop_type,
+                "admin": admin,
+            }, self)
+            shop.name_function.set_name(name)
+            if owner is not None:
+                shop.permission_function.set_permission(owner, "OWNER")
+            self.main.mongo["man10shop_v3"]["shops"].update_one({"shopId": shop.get_shop_id()},
+                                                                {"$set": shop.get_export_data()}, upsert=True)
+            return True
+        except Exception:
+            traceback.print_exc()
+            return False
 
     def get_player_shops(self, player: Player):
         try:
