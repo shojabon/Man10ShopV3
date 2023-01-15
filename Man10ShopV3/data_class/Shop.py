@@ -25,6 +25,7 @@ from Man10ShopV3.shop_functions.general.CategoryFunction import CategoryFunction
 from Man10ShopV3.shop_functions.storage.StorageRefillFunction import StorageRefillFunction
 from Man10ShopV3.shop_functions.tradeAmount.CoolDownFunction import CoolDownFunction
 from Man10ShopV3.shop_functions.tradeAmount.PerMinuteCoolDownFunction import PerMinuteCoolDownFunction
+from Man10ShopV3.shop_functions.tradeAmount.TotalPerMinuteCoolDownFunction import TotalPerMinuteCoolDownFunction
 from utils.JsonSchemaWrapper import merge_dictionaries
 from utils.JsonTools import flatten_dict, unflatten_dict
 
@@ -77,6 +78,7 @@ class Shop(object):
         # trade amount
         self.cool_down_function: CoolDownFunction = self.register_function("cool_down", CoolDownFunction())
         self.per_minute_cool_down_function: PerMinuteCoolDownFunction = self.register_function("per_minute_cool_down", PerMinuteCoolDownFunction())
+        self.total_per_minute_cool_down_function: TotalPerMinuteCoolDownFunction = self.register_function("total_per_minute_cool_down", TotalPerMinuteCoolDownFunction())
 
         self.register_queue_callback("shop.order", self.accept_order)
 
@@ -160,7 +162,8 @@ class Shop(object):
         order = OrderRequest()
         order.amount = data["data"]["amount"]
         order.player = data["player"]
-        self.perform_action(order)
+        if not self.perform_action(order):
+            return
 
         self.log_order(order)
 
