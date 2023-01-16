@@ -15,6 +15,9 @@ class SingleTransactionModeFunction(ShopFunction):
     def get_enabled(self):
         return self.get("enabled")
 
+    def is_function_enabled(self) -> bool:
+        return self.get_enabled()
+
     def is_allowed_to_use_shop(self, order: OrderRequest) -> bool:
         if self.is_function_enabled() and order.amount != 1:
             order.player.warn_message("取引数は1でなくてはなりません")

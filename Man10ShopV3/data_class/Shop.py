@@ -190,6 +190,14 @@ class Shop(object):
         if not self.perform_action(order):
             return
 
+        if self.get_shop_type() == "BUY":
+            order.player.success_message(str(order.amount) + "個の購入に成功しました")
+        if self.get_shop_type() == "SELL":
+            order.player.send_message(str(order.amount) + "個の売却に成功しました")
+        if self.get_shop_type() == "BARTER":
+            order.player.send_message("トレードに成功しました")
+
+
         self.log_order(order)
 
     # shop functions
@@ -232,7 +240,6 @@ class Shop(object):
             if len(function.allowed_shop_type) != 0 and self.get_shop_type() not in function.allowed_shop_type: continue
             function.after_perform_action(order)
 
-        order.player.send_message("成功しました")
         # send success message?
         # log ?
 
