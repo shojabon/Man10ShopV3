@@ -3,8 +3,6 @@ from __future__ import annotations
 import traceback
 from typing import TYPE_CHECKING, Optional
 
-import docker
-
 from Man10ShopV3.data_class.Player import Player
 from Man10ShopV3.data_class.Shop import Shop
 from Man10ShopV3.common_variables.common_variables import player_schema

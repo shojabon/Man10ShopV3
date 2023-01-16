@@ -14,7 +14,7 @@ class WeekDayToggleFunction(ShopFunction):
     def on_function_init(self):
         self.set_variable("dates", [True, True, True, True, True, True, True])
 
-    def get_dates(self) -> list[bool]:
+    def get_dates(self) -> list:
         return self.get("dates")
 
     def is_allowed_to_use_shop(self, order: OrderRequest) -> bool:

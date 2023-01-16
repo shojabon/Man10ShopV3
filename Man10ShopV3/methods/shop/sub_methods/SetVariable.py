@@ -4,7 +4,6 @@ import traceback
 from threading import Thread
 from typing import TYPE_CHECKING, Optional
 
-import docker
 import humps
 
 from Man10ShopV3.data_class.Player import Player

@@ -17,7 +17,7 @@ class RandomPriceFunction(ShopFunction):
     def set_time(self, time: int):
         return self.set("time", time)
 
-    def set_prices(self, prices: list[int]):
+    def set_prices(self, prices: list):
         return self.set("prices", prices)
 
     def set_last_refill_time(self, time: int):
@@ -26,7 +26,7 @@ class RandomPriceFunction(ShopFunction):
     def get_time(self):
         return self.get("time")
 
-    def get_prices(self) -> list[int]:
+    def get_prices(self) -> list:
         return self.get("prices")
 
     def get_last_refill_time(self):

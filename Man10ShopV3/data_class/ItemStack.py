@@ -5,7 +5,7 @@ class ItemStack(object):
     md5_type: str = "f955adf1e7104a74953d377f4b039b52"
     amount: int = 1
     name: str = None
-    lore: list[str] = None
+    lore: list = None
 
     def get_json(self):
         return {

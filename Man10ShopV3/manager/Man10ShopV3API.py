@@ -10,7 +10,6 @@ import requests
 from Man10ShopV3.data_class.Player import Player
 from Man10ShopV3.data_class.Shop import Shop
 from Man10ShopV3.data_class.Sign import Sign
-from utils.JsonTools import flatten_dict
 
 if TYPE_CHECKING:
     from Man10ShopV3 import Man10ShopV3
@@ -83,6 +82,7 @@ class Man10ShopV3API:
     def http_request(self, endpoint: str, path: str, method: str = "POST", payload: dict = None, return_json: bool = True):
         try:
             req = {}
+            print("req endpoint", self.main.config["api"]["endpoint"].replace("{endpoint}", endpoint) + path)
             if method == "GET":
                 req = requests.get(self.main.config["api"]["endpoint"].replace("{endpoint}", endpoint) + path,
                                    data=payload, headers={"x-api-key": self.main.config["api"]["key"]})
@@ -104,5 +104,5 @@ class Man10ShopV3API:
         result = self.main.api.http_request(endpoint, "/server/exec", "POST", {
             "command": command
         }, False)
-        print("executing command", command, "result", result)
+        print("executing command", command, "in server", endpoint, "result", result)
         return result

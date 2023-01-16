@@ -7,7 +7,7 @@ class SecretPriceModeFunction(ShopFunction):
     allowed_shop_type = ["BUY", "SELL"]
 
     def on_function_init(self):
-        self.set_variable("enabled", True)
+        self.set_variable("enabled", False)
 
     def set_enabled(self, enabled: bool):
         return self.set("enabled", enabled)
