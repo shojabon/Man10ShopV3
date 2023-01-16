@@ -10,6 +10,7 @@ from Man10ShopV3.data_class.ShopFunction import ShopFunction
 from Man10ShopV3.shop_functions.MoneyFunction import MoneyFunction
 from Man10ShopV3.shop_functions.allowed_to_use.DisabledFromFunction import DisabledFromFunction
 from Man10ShopV3.shop_functions.allowed_to_use.EnabledFromFunction import EnabledFromFunction
+from Man10ShopV3.shop_functions.barter.SetBarterFunction import SetBarterFunction
 from Man10ShopV3.shop_functions.general.RandomPriceFunction import RandomPriceFunction
 from Man10ShopV3.shop_functions.general.SecretPriceModeFunction import SecretPriceModeFunction
 from Man10ShopV3.shop_functions.tradeAmount.IpLimitFunction import IpLimitFunction
@@ -94,6 +95,9 @@ class Shop(object):
 
         self.ip_limit_function: IpLimitFunction = self.register_function(
             "ip_limit", IpLimitFunction())
+
+        # barter
+        self.set_barter_function: SetBarterFunction = self.register_function("set_barter", SetBarterFunction())
 
         self.register_queue_callback("shop.order", self.accept_order)
 

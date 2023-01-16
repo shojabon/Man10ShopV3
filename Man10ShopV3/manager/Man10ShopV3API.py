@@ -101,8 +101,8 @@ class Man10ShopV3API:
             return None
 
     def execute_command_in_server(self, endpoint, command):
-        print("executing command", command)
         result = self.main.api.http_request(endpoint, "/server/exec", "POST", {
             "command": command
         }, False)
+        print("executing command", command, "result", result)
         return result

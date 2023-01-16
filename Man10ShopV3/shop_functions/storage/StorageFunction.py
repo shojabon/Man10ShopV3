@@ -82,7 +82,6 @@ class StorageFunction(ShopFunction):
                 player.warn_message(result.message())
 
     def buy_storage(self, data):
-        print("aa", data)
         if "amount" not in data["data"]: return
         if "player" not in data: return
         player: Player = data["player"]
