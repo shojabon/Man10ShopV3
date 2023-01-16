@@ -43,7 +43,7 @@ class Shop(object):
     api: Man10ShopV3API = None
 
     variable_permissions = {}
-    variable_callbacks = {}
+    variable_check = {}
     dynamic_variables = {}
 
     def __init__(self, main: Man10ShopV3API):
@@ -132,7 +132,15 @@ class Shop(object):
         data = flatten_dict(self.data)
         return data.get(key)
 
-    def set_variable(self, key, value, update_db=True):
+    def set_variable(self, key, value, update_db=True, player: Player = None):
+        if key in self.variable_check:
+            try:
+                if not self.variable_check[key](player, value):
+                    return False
+            except Exception:
+                traceback.print_exc()
+                return False
+
         data = flatten_dict(self.data)
         data[key] = value
         self.data = unflatten_dict(data)

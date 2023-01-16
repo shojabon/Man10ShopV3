@@ -22,10 +22,12 @@ class ShopFunction(object):
 
     # config functions
 
-    def set_variable(self, key, value, permission="MODERATOR"):
+    def set_variable(self, key, value, permission="MODERATOR", variable_check: Callable = None):
         self.shop.variable_permissions[self.config_prefix + "." + key] = permission
         if self.get(key) is None:
             self.set(key, value, False)
+        if variable_check is not None:
+            self.shop.variable_check[self.config_prefix + "." + key] = variable_check
 
     def get(self, key):
         return self.shop.get_variable(self.config_prefix + "." + key)
