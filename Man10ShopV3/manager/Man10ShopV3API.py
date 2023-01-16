@@ -38,19 +38,19 @@ class Man10ShopV3API:
         if shop_object is None:
             return None
         del shop_object["_id"]
-        shop = Shop()
-        shop.from_json(shop_object, self)
+        shop = Shop(self)
+        shop.from_json(shop_object)
         self.shops[shop_id] = shop
         return self.shops[shop_id]
 
     def create_shop(self, owner: Player, shop_type: str, name: str, admin: bool) -> bool:
         try:
-            shop = Shop()
+            shop = Shop(self)
             shop.from_json({
                 "shopId": str(uuid.uuid1()),
                 "shopType": shop_type,
                 "admin": admin,
-            }, self)
+            })
             shop.name_function.set_name(name)
             if owner is not None:
                 shop.permission_function.set_permission(owner, "OWNER")

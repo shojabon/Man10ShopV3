@@ -39,6 +39,9 @@ class ShopFunction(object):
     def delete(self, key):
         return self.shop.delete_variable(key)
 
+    def set_dynamic_variable(self, key: str, value) -> dict:
+        return self.shop.set_dynamic_variable(self.config_prefix + "." + key, value)
+
     # base functions
 
     def on_function_init(self):
@@ -71,3 +74,4 @@ class ShopFunction(object):
     def log_data(self, order: OrderRequest) -> dict: pass
 
     def per_minute_execution_task(self): pass
+

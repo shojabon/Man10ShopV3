@@ -44,9 +44,10 @@ class Shop(object):
 
     variable_permissions = {}
     variable_callbacks = {}
+    dynamic_variables = {}
 
-    def __init__(self):
-
+    def __init__(self, main: Man10ShopV3API):
+        self.api = main
         self.data = {}
         self.functions: dict[str, ShopFunction] = {}
         self.queue_callbacks: dict[str, list[Callable]] = {}
@@ -96,12 +97,11 @@ class Shop(object):
 
         self.register_queue_callback("shop.order", self.accept_order)
 
-    def from_json(self, data: dict, main: Man10ShopV3API):
+    def from_json(self, data: dict):
         self.data = merge_dictionaries(self.data, humps.decamelize(data))
-        self.api = main
 
     def get_export_data(self):
-        return humps.camelize(self.data)
+        return humps.camelize(merge_dictionaries(self.data, self.dynamic_variables))
 
     def register_function(self, prefix: str, function: ShopFunction) -> Any:
         function.shop = self
@@ -146,11 +146,10 @@ class Shop(object):
         else:
             return True
 
-    def delete_variable(self, key):
-        data = flatten_dict(self.data)
-        if key not in data:
-            return False
-        del data[key]
+    def set_dynamic_variable(self, key: str, value):
+        data = flatten_dict(self.dynamic_variables)
+        data[key] = value
+        self.dynamic_variables = unflatten_dict(data)
         return True
 
     # base variables

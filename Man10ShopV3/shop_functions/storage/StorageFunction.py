@@ -15,12 +15,22 @@ class StorageFunction(ShopFunction):
 
         self.shop.register_queue_callback("storage.item.deposit", self.deposit_item)
         self.shop.register_queue_callback("storage.item.withdraw", self.withdraw_item)
+        self.shop.register_queue_callback("storage.buy", self.buy_storage)
+
+        self.set_dynamic_variable("storage_size_max", self.get_storage_max_size())
+        self.set_dynamic_variable("storage_slot_price", self.get_storage_slot_price())
 
     def get_storage_size(self):
         return self.get("storage_size")
 
     def get_item_count(self):
         return self.get("item_count")
+
+    def get_storage_max_size(self):
+        return self.shop.api.main.config["defaultVariables"]["storage"]["storageSizeMax"]
+
+    def get_storage_slot_price(self):
+        return self.shop.api.main.config["defaultVariables"]["storage"]["storageSlotPrice"]
 
     def set_item_count(self, amount: int):
         return self.set("item_count", amount)
@@ -38,7 +48,8 @@ class StorageFunction(ShopFunction):
         if "amount" not in data["data"]: return
         if player_mode:
             player: Player = data["player"]
-            take_item_operation = player.item_take(self.shop.target_item_function.get_target_item(), data["data"]["amount"])
+            take_item_operation = player.item_take(self.shop.target_item_function.get_target_item(),
+                                                   data["data"]["amount"])
             if not take_item_operation.success():
                 player.warn_message(take_item_operation.message())
                 return
@@ -69,6 +80,22 @@ class StorageFunction(ShopFunction):
                 player.success_message("引き出しに成功しました 現在:" + str(self.get_item_count()))
             else:
                 player.warn_message(result.message())
+
+    def buy_storage(self, data):
+        print("aa", data)
+        if "amount" not in data["data"]: return
+        if "player" not in data: return
+        player: Player = data["player"]
+        buying_units = data["data"]["amount"]
+        if buying_units + self.get_storage_size() > self.get_storage_max_size():
+            buying_units = self.get_storage_max_size() - self.get_storage_size()
+        total_price = buying_units * self.get_storage_slot_price()
+        request_take_money = player.take_money(total_price)
+        if not request_take_money.success():
+            player.warn_message(request_take_money.message())
+            return
+        self.set("storage_size", self.get_storage_size() + buying_units)
+        player.success_message("ストレージを購入しました 現在:" + str(self.get_storage_size()) + "個")
 
     # =========
 
