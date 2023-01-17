@@ -13,6 +13,7 @@ from Man10ShopV3.shop_functions.allowed_to_use.EnabledFromFunction import Enable
 from Man10ShopV3.shop_functions.barter.SetBarterFunction import SetBarterFunction
 from Man10ShopV3.shop_functions.general.RandomPriceFunction import RandomPriceFunction
 from Man10ShopV3.shop_functions.general.SecretPriceModeFunction import SecretPriceModeFunction
+from Man10ShopV3.shop_functions.loot_box.LootBoxGroupFunction import LootBoxGroupFunction
 from Man10ShopV3.shop_functions.tradeAmount.IpLimitFunction import IpLimitFunction
 from Man10ShopV3.shop_functions.tradeAmount.LimitUseFunction import LimitUseFunction
 from Man10ShopV3.shop_functions.allowed_to_use.WeekDayToggleFunction import WeekDayToggleFunction
@@ -98,6 +99,10 @@ class Shop(object):
 
         # barter
         self.set_barter_function: SetBarterFunction = self.register_function("set_barter", SetBarterFunction())
+
+        # loot box
+        self.loot_box_group_function: LootBoxGroupFunction = self.register_function("loot_box_group", LootBoxGroupFunction())
+
 
         self.register_queue_callback("shop.order", self.accept_order)
 
@@ -193,9 +198,9 @@ class Shop(object):
         if self.get_shop_type() == "BUY":
             order.player.success_message(str(order.amount) + "個の購入に成功しました")
         if self.get_shop_type() == "SELL":
-            order.player.send_message(str(order.amount) + "個の売却に成功しました")
+            order.player.success_message(str(order.amount) + "個の売却に成功しました")
         if self.get_shop_type() == "BARTER":
-            order.player.send_message("トレードに成功しました")
+            order.player.success_message("トレードに成功しました")
 
 
         self.log_order(order)
@@ -283,6 +288,9 @@ class Shop(object):
 
         if self.get_shop_type() == "SELL":
             result[0] = "§c§l買取ショップ"
+
+        if self.get_shop_type() == "BARTER":
+            result[0] = "§b§lトレードショップ"
 
         for function in self.functions.values():
             function: ShopFunction = function

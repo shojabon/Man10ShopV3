@@ -59,6 +59,7 @@ def flask_mat_response_wrapper():
         @wraps(f)
         def wrapped(*args, **kwargs):
             response = f(*args, **kwargs)
+            print(response)
 
             user_defined_language = request.args.get('lang')
             if user_defined_language is None:

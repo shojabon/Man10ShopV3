@@ -48,7 +48,7 @@ class StorageFunction(ShopFunction):
         if "amount" not in data["data"]: return
         if player_mode:
             player: Player = data["player"]
-            take_item_operation = player.item_take(self.shop.target_item_function.get_target_item(),
+            take_item_operation = player.item_take(self.shop.target_item_function.get_target_item().type_base64,
                                                    data["data"]["amount"])
             if not take_item_operation.success():
                 player.warn_message(take_item_operation.message())
@@ -75,7 +75,7 @@ class StorageFunction(ShopFunction):
             return
 
         if player_mode:
-            result = player.item_give(self.shop.target_item_function.get_target_item(), data["data"]["amount"])
+            result = player.item_give(self.shop.target_item_function.get_target_item().type_base64, data["data"]["amount"])
             if result.success() and player_mode:
                 player.success_message("引き出しに成功しました 現在:" + str(self.get_item_count()))
             else:
