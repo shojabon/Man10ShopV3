@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import traceback
+import uuid
 from typing import TYPE_CHECKING, Callable, Any
 import humps
 
@@ -13,7 +14,9 @@ from Man10ShopV3.shop_functions.allowed_to_use.EnabledFromFunction import Enable
 from Man10ShopV3.shop_functions.barter.SetBarterFunction import SetBarterFunction
 from Man10ShopV3.shop_functions.general.RandomPriceFunction import RandomPriceFunction
 from Man10ShopV3.shop_functions.general.SecretPriceModeFunction import SecretPriceModeFunction
+from Man10ShopV3.shop_functions.loot_box.LootBoxBigWinFunction import LootBoxBigWinFunction
 from Man10ShopV3.shop_functions.loot_box.LootBoxGroupFunction import LootBoxGroupFunction
+from Man10ShopV3.shop_functions.loot_box.LootBoxPaymentFunction import LootBoxPaymentFunction
 from Man10ShopV3.shop_functions.tradeAmount.IpLimitFunction import IpLimitFunction
 from Man10ShopV3.shop_functions.tradeAmount.LimitUseFunction import LimitUseFunction
 from Man10ShopV3.shop_functions.allowed_to_use.WeekDayToggleFunction import WeekDayToggleFunction
@@ -102,6 +105,8 @@ class Shop(object):
 
         # loot box
         self.loot_box_group_function: LootBoxGroupFunction = self.register_function("loot_box_group", LootBoxGroupFunction())
+        self.loot_box_payment_function: LootBoxPaymentFunction = self.register_function("loot_box_payment", LootBoxPaymentFunction())
+        self.loot_box_big_win_function: LootBoxBigWinFunction = self.register_function("loot_box_big_win", LootBoxBigWinFunction())
 
 
         self.register_queue_callback("shop.order", self.accept_order)
@@ -192,6 +197,7 @@ class Shop(object):
         order = OrderRequest()
         order.amount = data["data"]["amount"]
         order.player = data["player"]
+        order.log_id = str(uuid.uuid1())
         if not self.perform_action(order):
             return
 
@@ -316,6 +322,7 @@ class Shop(object):
 
     def log_order(self, order: OrderRequest):
         log_object = {
+            "log_id": order.log_id,
             "shop_id": self.get_shop_id(),
             "shop_type": self.get_shop_type(),
             "player": order.player.get_json(),

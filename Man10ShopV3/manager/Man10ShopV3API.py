@@ -5,6 +5,7 @@ import traceback
 import uuid
 from typing import TYPE_CHECKING, Optional
 
+import humps
 import requests
 
 from Man10ShopV3.data_class.Player import Player
@@ -106,3 +107,11 @@ class Man10ShopV3API:
         }, False)
         print("executing command", command, "in server", endpoint, "result", result)
         return result
+
+    def update_log(self, log_id: str, data: dict):
+        try:
+            self.main.mongo["man10shop_v3"]["trade_log"].update_one({"logId": log_id}, {"$set": humps.camelize(data)})
+            return True
+        except Exception:
+            traceback.print_exc()
+            return False

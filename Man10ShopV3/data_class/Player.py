@@ -84,6 +84,10 @@ class Player(object):
             "playerUuid": self.uuid
         })
 
+    def execute_command_in_server(self, command: str):
+        result = self.main.api.execute_command_in_server(self.server, command)
+        return RequestResponse(result)
+
     def item_give(self, item_base64, amount: int):
         command = "mshop itemGive " + self.uuid + " " + item_base64 + " " + str(amount)
         result = self.main.api.execute_command_in_server(self.server, command)

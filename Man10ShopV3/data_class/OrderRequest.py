@@ -1,7 +1,4 @@
 from __future__ import annotations
-import json
-
-import requests
 
 from Man10ShopV3.data_class.Player import Player
 
@@ -14,6 +11,7 @@ if TYPE_CHECKING:
 class OrderRequest(object):
     amount = 1
     player: Player = None
+    log_id: str = None
 
     # def __init__(self, main: Man10ShopV3):
     #     self.main = main

@@ -80,7 +80,7 @@ class Man10ShopV3:
 
         # print(self.api.get_player_shops(player)[1].category_function.set_category("aaa"))
         # self.mongo["man10shop_v3"]["shops"].delete_many({})
-        # self.api.create_shop(player, "1", 1000, "BUY", False)
+        # self.api.create_shop(player, "BUY", "test", True)
         # self.api.create_shop(player, "2", 1000, "BUY", False)
         # self.api.create_shop(player, "3", 1000, "BUY", False)
         # shop = self.api.get_shop("c83bab75-9216-11ed-a3b6-803253476232")
