@@ -51,9 +51,9 @@ class ShopFunction(object):
 
     def item_count(self, player: Player) -> Optional[int]:
         if self.shop.get_shop_type() == "SELL":
-            return self.shop.storage_function.get_item_count()
+            return self.shop.storage_function.get_storage_size()
         else:
-            return None
+            return self.shop.storage_function.get_item_count()
 
     def is_function_enabled(self) -> bool:
         return True

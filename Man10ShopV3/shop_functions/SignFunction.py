@@ -21,7 +21,7 @@ class SignFunction(ShopFunction):
             if sign["server"] not in servers:
                 servers.append(sign["server"])
         for server in servers:
-            self.shop.api.execute_command_in_server(server, "mshop signUpdate " + str(self.shop.get_shop_id()))
+            self.shop.api.execute_command_in_server(server, "mshopv3 signUpdate " + str(self.shop.get_shop_id()))
 
     def add_sign(self, sign: Sign):
         signs = self.get_signs()

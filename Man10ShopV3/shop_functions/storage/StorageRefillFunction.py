@@ -59,13 +59,13 @@ class StorageRefillFunction(ShopFunction):
         return True
 
     def item_count(self, player: Player) -> Optional[int]:
-        if self.shop.is_admin(): return -self.get_item_left()
+        if self.shop.is_admin(): return -self.transactions_left()
         return self.transactions_left()
 
     def is_allowed_to_use_shop(self, order: OrderRequest) -> bool:
         if self.transactions_left() < order.amount:
             if self.shop.storage_function.get_item_count() == 0 and not self.shop.is_admin():
-                order.player.warn_message("このショップは在庫不足")
+                order.player.warn_message("このショップは在庫不足です")
                 return False
             if self.shop.get_shop_type() == "SELL":
                 order.player.warn_message(

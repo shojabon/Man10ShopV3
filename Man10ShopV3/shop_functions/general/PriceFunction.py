@@ -53,3 +53,11 @@ class PriceFunction(ShopFunction):
             "total_price": order.amount * self.get_price()
         }
 
+    def sign_information(self, sign_info: list) -> list:
+        return [
+            "",
+            "§b" + str(self.get_price()) + "円",
+            "",
+            ""
+        ]
+

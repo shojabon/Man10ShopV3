@@ -209,6 +209,7 @@ class Shop(object):
             order.player.success_message("トレードに成功しました")
 
 
+
         self.log_order(order)
 
     # shop functions
@@ -285,7 +286,7 @@ class Shop(object):
     def get_sign_info(self):
         result = [
             "ショップ",
-            "§b" + str(self.price_function.get_price()) + "円",
+            "",
             "",
             ""
         ]
@@ -297,6 +298,9 @@ class Shop(object):
 
         if self.get_shop_type() == "BARTER":
             result[0] = "§b§lトレードショップ"
+
+        if self.get_shop_type() == "LOOT_BOX":
+            result[0] = "§d§lガチャ"
 
         for function in self.functions.values():
             function: ShopFunction = function

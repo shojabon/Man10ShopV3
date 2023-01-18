@@ -55,7 +55,10 @@ class PerMinuteCoolDownFunction(ShopFunction):
     def item_count(self, player: Player) -> Optional[int]:
         if player is None:
             return 0
-        return self.get_amount() - self.player_in_time_trade_count(player)
+        count = self.get_amount() - self.player_in_time_trade_count(player)
+        if self.shop.is_admin():
+            return -count
+        return count
 
     def is_function_enabled(self) -> bool:
         if self.get_time() == 0 or self.get_amount() == 0:

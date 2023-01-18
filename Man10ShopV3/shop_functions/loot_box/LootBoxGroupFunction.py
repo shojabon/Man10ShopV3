@@ -21,8 +21,14 @@ class LootBoxGroupFunction(ShopFunction):
     def get_groups(self) -> List[LootBoxGroup]:
         return [LootBoxGroup().from_json(x) for x in self.get("groups")]
 
+    def is_allowed_to_use_shop(self, order: OrderRequest) -> bool:
+        if sum([x.weight for x in self.get_groups()]) != 100000000:
+            order.player.warn_message("重量設定の合計値が正しくありません")
+            return False
+        return True
+
     def after_perform_action(self, order: OrderRequest):
-        order.player.execute_command_in_server("mshop lootBoxPlay " + self.shop.get_shop_id() + " " + order.player.uuid + " " + order.log_id)
+        order.player.execute_command_in_server("mshopv3 lootBoxPlay " + self.shop.get_shop_id() + " " + order.player.uuid + " " + order.log_id)
 
     # queue task
     def log_loot_box_win_task(self, data):
@@ -39,3 +45,11 @@ class LootBoxGroupFunction(ShopFunction):
             player.warn_message(request_give_item.message())
             player.warn_message("エラーコード: " + data["data"]["log_id"])
         player.success_message("§a§lおめでとうございます『" + item.display_name + "』§a§lが当たりました!")
+
+    def sign_information(self, sign_info: list) -> list:
+        return [
+            "",
+            " ",
+            "",
+            ""
+        ]

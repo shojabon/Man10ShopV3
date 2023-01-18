@@ -89,17 +89,17 @@ class Player(object):
         return RequestResponse(result)
 
     def item_give(self, item_base64, amount: int):
-        command = "mshop itemGive " + self.uuid + " " + item_base64 + " " + str(amount)
+        command = "mshopv3 itemGive " + self.uuid + " " + item_base64 + " " + str(amount)
         result = self.main.api.execute_command_in_server(self.server, command)
         return RequestResponse(result)
 
     def item_take(self, item_base64, amount: int):
-        command = "mshop itemTake " + self.uuid + " " + item_base64 + " " + str(amount)
+        command = "mshopv3 itemTake " + self.uuid + " " + item_base64 + " " + str(amount)
         result = self.main.api.execute_command_in_server(self.server, command)
         return RequestResponse(result)
 
     def item_check(self, item_base64, amount: int):
-        command = "mshop itemCheck " + self.uuid + " " + item_base64 + " " + str(amount)
+        command = "mshopv3 itemCheck " + self.uuid + " " + item_base64 + " " + str(amount)
         result = self.main.api.execute_command_in_server(self.server, command)
         return RequestResponse(result)
 
@@ -119,11 +119,11 @@ class Player(object):
         return player_data["balance"]
 
     def give_money(self, amount: float):
-        result = self.main.api.execute_command_in_server(self.server, "mshop moneyGive " + self.uuid + " " + str(amount))
+        result = self.main.api.execute_command_in_server(self.server, "mshopv3 moneyGive " + self.uuid + " " + str(amount))
         return RequestResponse(result)
 
     def take_money(self, amount: float):
-        result = self.main.api.execute_command_in_server(self.server, "mshop moneyTake " + self.uuid + " " + str(amount))
+        result = self.main.api.execute_command_in_server(self.server, "mshopv3 moneyTake " + self.uuid + " " + str(amount))
         return RequestResponse(result)
 
     # uuid tools
