@@ -22,6 +22,7 @@ class LootBoxGroup(object):
 
     def get_json(self):
         return {
+            "object_type": "loot_box_group_data",
             "icon": self.icon,
             "items": [x.get_json() for x in self.items],
             "big_win": self.big_win,

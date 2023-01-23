@@ -52,7 +52,7 @@ class ListShopsMethod:
                     results.append({
                         "shopId": shop.get_shop_id(),
                         "name": shop.name_function.get_name(),
-                        "shopType": shop.get_shop_type(),
+                        "shopType": shop.get_shop_type_string(),
                         "icon": shop.target_item_function.get_target_item().type_base64,
                         "permission": permission,
                         "money": shop.money_function.get_money(),

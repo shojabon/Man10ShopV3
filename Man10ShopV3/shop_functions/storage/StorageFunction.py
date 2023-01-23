@@ -2,7 +2,6 @@ from typing import Optional
 
 from Man10ShopV3.data_class.OrderRequest import OrderRequest
 from Man10ShopV3.data_class.Player import Player
-from Man10ShopV3.data_class.Response import RequestResponse
 from Man10ShopV3.data_class.ShopFunction import ShopFunction
 
 

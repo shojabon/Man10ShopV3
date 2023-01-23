@@ -27,8 +27,14 @@ class SetBarterFunction(ShopFunction):
     #     return True
 
     def is_allowed_to_use_shop(self, order: OrderRequest) -> bool:
+        required_item_map = {}
+
         for required_item in [x for x in self.get_required_items() if x is not None]:
-            if not order.player.item_check(required_item.type_base64, required_item.amount).success():
+            if required_item.type_base64 not in required_item_map:
+                required_item_map[required_item.type_base64] = 0
+            required_item_map[required_item.type_base64] += required_item.amount
+        for required_item in required_item_map.keys():
+            if not order.player.item_check(required_item, required_item_map[required_item]).success():
                 order.player.warn_message("トレードのためのアイテムが不足してます")
                 return False
         return True
@@ -45,3 +51,11 @@ class SetBarterFunction(ShopFunction):
     # temp ?
     def item_count(self, player: Player) -> Optional[int]:
         return 0
+
+    def sign_information(self, sign_info: list) -> list:
+        return [
+            "",
+            " " if self.shop.shop_enabled_function.is_enabled() else "",
+            "",
+            ""
+        ]

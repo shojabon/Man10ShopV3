@@ -49,7 +49,7 @@ class LootBoxGroupFunction(ShopFunction):
     def sign_information(self, sign_info: list) -> list:
         return [
             "",
-            " ",
+            " " if self.shop.shop_enabled_function.is_enabled() else "",
             "",
             ""
         ]

@@ -50,6 +50,8 @@ class ShopFunction(object):
         pass
 
     def item_count(self, player: Player) -> Optional[int]:
+        if self.shop.is_admin():
+            return 0
         if self.shop.get_shop_type() == "SELL":
             return self.shop.storage_function.get_storage_size()
         else:

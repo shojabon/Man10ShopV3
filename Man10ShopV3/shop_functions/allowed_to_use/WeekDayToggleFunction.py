@@ -17,6 +17,10 @@ class WeekDayToggleFunction(ShopFunction):
     def get_dates(self) -> list:
         return self.get("dates")
 
+    def item_count(self, player: Player) -> Optional[int]:
+        if not self.get_dates()[(datetime.datetime.now().weekday() + 1) % 7]:
+            return 0
+        return None
     def is_allowed_to_use_shop(self, order: OrderRequest) -> bool:
         if not self.get_dates()[(datetime.datetime.now().weekday() + 1) % 7]:
             allowed_dates = " ".join([x for x in self.date_labels if self.get_dates()[self.date_labels.index(x)]])[:-1]

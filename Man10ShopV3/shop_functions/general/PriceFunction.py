@@ -54,6 +54,8 @@ class PriceFunction(ShopFunction):
         }
 
     def sign_information(self, sign_info: list) -> list:
+        if self.shop.secret_price_mode_function.get_enabled():
+            return None
         return [
             "",
             "§b" + str(self.get_price()) + "円",

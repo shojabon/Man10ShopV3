@@ -9,6 +9,7 @@ import humps
 from Man10ShopV3.data_class.Player import Player
 from Man10ShopV3.data_class.ShopFunction import ShopFunction
 from Man10ShopV3.shop_functions.MoneyFunction import MoneyFunction
+from Man10ShopV3.shop_functions.agent.MoneyRefillFunction import MoneyRefillFunction
 from Man10ShopV3.shop_functions.allowed_to_use.DisabledFromFunction import DisabledFromFunction
 from Man10ShopV3.shop_functions.allowed_to_use.EnabledFromFunction import EnabledFromFunction
 from Man10ShopV3.shop_functions.barter.SetBarterFunction import SetBarterFunction
@@ -108,6 +109,9 @@ class Shop(object):
         self.loot_box_payment_function: LootBoxPaymentFunction = self.register_function("loot_box_payment", LootBoxPaymentFunction())
         self.loot_box_big_win_function: LootBoxBigWinFunction = self.register_function("loot_box_big_win", LootBoxBigWinFunction())
 
+        # agent
+        self.money_refill_function: MoneyRefillFunction = self.register_function("money_refill", MoneyRefillFunction())
+
 
         self.register_queue_callback("shop.order", self.accept_order)
 
@@ -178,6 +182,17 @@ class Shop(object):
 
     def get_shop_type(self):
         return self.get_variable("shop_type")
+
+    def get_shop_type_string(self):
+        shop_type = self.get_shop_type()
+        if shop_type == "SELL":
+            return "買取りショップ"
+        if shop_type == "BUY":
+            return "販売ショップ"
+        if shop_type == "BARTER":
+            return "トレードショップ"
+        if shop_type == "LOOT_BOX":
+            return "ガチャショップ"
 
     def set_shop_type(self, shop_type: str):
         return self.set_variable("shop_type", shop_type, True)
@@ -251,9 +266,6 @@ class Shop(object):
             if not function.is_function_enabled(): continue
             if len(function.allowed_shop_type) != 0 and self.get_shop_type() not in function.allowed_shop_type: continue
             function.after_perform_action(order)
-
-        # send success message?
-        # log ?
 
         return True
 

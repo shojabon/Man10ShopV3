@@ -70,8 +70,8 @@ class MoneyFunction(ShopFunction):
 
     # =========
 
-    def item_count(self, player: Player) -> int:
-        if self.shop.is_admin(): return 0
+    def item_count(self, player: Player):
+        if self.shop.is_admin(): return None
         if self.shop.get_shop_type() == "SELL":
             if self.shop.price_function.get_price() == 0: return super().item_count(player)
             return self.get_money() // self.shop.price_function.get_price()

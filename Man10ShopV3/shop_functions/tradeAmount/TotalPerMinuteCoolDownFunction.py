@@ -30,13 +30,28 @@ class TotalPerMinuteCoolDownFunction(ShopFunction):
 
     def in_time_trade_count(self):
         try:
-            result = self.shop.api.main.mongo["man10shop_v3"]["trade_log"].count_documents({
-                "shopId": self.shop.get_shop_id(),
-                "time": {
-                    "$gte": datetime.datetime.fromtimestamp(datetime.datetime.now().timestamp() - self.get_time() * 60)
+            result = self.shop.api.main.mongo["man10shop_v3"]["trade_log"].aggregate([
+                {
+                    "$match": {
+                        "shopId": self.shop.get_shop_id(),
+                        "time": {
+                            "$gte": datetime.datetime.fromtimestamp(
+                                datetime.datetime.now().timestamp() - self.get_time() * 60)
+                        }
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": "$shopId",
+                        "total": {"$sum": "$orderData.amount"}
+                    }
+
                 }
-            }, limit=self.get_amount())
-            return result
+            ])
+            result = [x for x in result]
+            if len(result) == 0:
+                return 0
+            return result[0]["total"]
         except Exception:
             traceback.print_exc()
             return None
@@ -57,6 +72,8 @@ class TotalPerMinuteCoolDownFunction(ShopFunction):
         count = self.get_amount() - self.in_time_trade_count()
         if self.shop.is_admin():
             return -count
+        if count < 0:
+            return 0
         return count
 
     def is_function_enabled(self) -> bool:

@@ -19,7 +19,7 @@ class Man10ShopV3:
         while self.running:
             try:
                 completed_task = []
-                result = self.mongo["man10shop_v3"]["queue"].find({}).limit(10)
+                result = self.mongo["man10shop_v3"]["queue"].find({}).limit(self.config["queueSize"])
                 result = [humps.decamelize(x) for x in result]
                 for request in result:
                     if "player" in request:
@@ -73,10 +73,10 @@ class Man10ShopV3:
         Thread(target=self.process_per_minute_execution_task).start()
 
         # self.shop = InstanceMethod(self)
-        player = Player()
-        player.name = "Sho0"
-        player.uuid = "ffa9b4cb-ada1-4597-ad24-10e318f994c8"
-        player.main = self
+        # player = Player()
+        # player.name = "Sho0"
+        # player.uuid = "ffa9b4cb-ada1-4597-ad24-10e318f994c8"
+        # player.main = self
 
         # print(self.api.get_player_shops(player)[1].category_function.set_category("aaa"))
         # self.mongo["man10shop_v3"]["shops"].delete_many({})

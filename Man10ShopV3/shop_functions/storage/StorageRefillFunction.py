@@ -67,6 +67,9 @@ class StorageRefillFunction(ShopFunction):
             if self.shop.storage_function.get_item_count() == 0 and not self.shop.is_admin():
                 order.player.warn_message("このショップは在庫不足です")
                 return False
+            if self.transactions_left() != 0:
+                order.player.warn_message("現在" + str(self.transactions_left()) + "個まで取引することができます")
+                return False
             if self.shop.get_shop_type() == "SELL":
                 order.player.warn_message(
                     "このショップは買い取りを停止しています 次回の売却は " + self.get_next_refill_time().strftime("%Y-%m-%d %H:%M:%S"))
