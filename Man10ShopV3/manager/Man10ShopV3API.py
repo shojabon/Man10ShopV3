@@ -32,7 +32,7 @@ class Man10ShopV3API:
 
     def get_shop(self, shop_id) -> Optional[Shop]:
         if shop_id in self.shops:
-            shop = self.shops[shop_id]
+            shop = self.shops.get(shop_id)
             return shop
         shop_object = self.main.mongo["man10shop_v3"]["shops"].find_one({"shopId": shop_id})
         if shop_object is None:
@@ -41,21 +41,23 @@ class Man10ShopV3API:
         shop = Shop(self)
         shop.from_json(shop_object)
         self.shops[shop_id] = shop
-        return self.shops[shop_id]
+        return self.shops.get(shop_id)
 
     def create_shop(self, owner: Player, shop_type: str, name: str, admin: bool) -> bool:
         try:
             shop = Shop(self)
+            shop_id = str(uuid.uuid1())
             shop.from_json({
-                "shopId": str(uuid.uuid1()),
+                "shopId": shop_id,
                 "shopType": shop_type,
                 "admin": admin,
             })
             shop.name_function.set_name(name)
             if owner is not None:
-                shop.permission_function.set_permission(owner, "OWNER")
+                shop.permission_function.set_permission(owner, "OWNER", False)
+            data = shop.get_export_data()
             self.main.mongo["man10shop_v3"]["shops"].update_one({"shopId": shop.get_shop_id()},
-                                                                {"$set": shop.get_export_data()}, upsert=True)
+                                                                {"$set": data}, upsert=True)
             return True
         except Exception:
             traceback.print_exc()

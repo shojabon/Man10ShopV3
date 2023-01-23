@@ -1,4 +1,5 @@
 import datetime
+import math
 from typing import Optional
 
 from Man10ShopV3.data_class.OrderRequest import OrderRequest
@@ -39,7 +40,7 @@ class StorageRefillFunction(ShopFunction):
     def calculate_last_refill_time(self):
         seconds_since_last_refill = datetime.datetime.now().timestamp() - self.get_last_refill_time()
         skipped_refills = seconds_since_last_refill / (self.get_minutes() * 60)
-        return self.get_last_refill_time() + skipped_refills * self.get_minutes() * 60
+        return self.get_last_refill_time() + math.floor(skipped_refills) * self.get_minutes() * 60
 
     def transactions_left(self):
         if datetime.datetime.now().timestamp() - self.get_last_refill_time() >= self.get_minutes() * 60:

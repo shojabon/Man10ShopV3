@@ -150,10 +150,11 @@ class Shop(object):
         data = flatten_dict(self.data)
         return data.get(key)
 
-    def set_variable(self, key, value, update_db=True, player: Player = None):
-        if key in self.variable_check:
+    def set_variable(self, key, value, update_db=True, player: Player = None, variable_check: bool = True):
+        if variable_check and key in self.variable_check:
             try:
-                if not self.variable_check[key](player, value):
+
+                if not self.variable_check[key](self, player, value):
                     return False
             except Exception:
                 traceback.print_exc()

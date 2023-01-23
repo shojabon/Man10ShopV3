@@ -98,6 +98,11 @@ class Player(object):
         result = self.main.api.execute_command_in_server(self.server, command)
         return RequestResponse(result)
 
+    def has_inventory_space(self):
+        command = "mshop inventoryHasSpace " + self.uuid
+        result = self.main.api.execute_command_in_server(self.server, command)
+        return RequestResponse(result)
+
     def item_check(self, item_base64, amount: int):
         command = "mshop itemCheck " + self.uuid + " " + item_base64 + " " + str(amount)
         result = self.main.api.execute_command_in_server(self.server, command)

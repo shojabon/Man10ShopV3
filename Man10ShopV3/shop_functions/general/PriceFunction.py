@@ -58,7 +58,7 @@ class PriceFunction(ShopFunction):
             return None
         return [
             "",
-            "§b" + str(self.get_price()) + "円",
+            "§b" + str(f"{self.get_price():,}") + "円",
             "",
             ""
         ]

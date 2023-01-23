@@ -43,42 +43,45 @@ class StorageFunction(ShopFunction):
     # =========
 
     def deposit_item(self, data):
-        player_mode = "player" in data
+        if "player" not in data: return
         if "amount" not in data["data"]: return
-        if player_mode:
-            player: Player = data["player"]
-            take_item_operation = player.item_take(self.shop.target_item_function.get_target_item().type_base64,
-                                                   data["data"]["amount"])
-            if not take_item_operation.success():
-                player.warn_message(take_item_operation.message())
-                return
-
+        player: Player = data["player"]
+        if data["data"]["amount"] + self.get_item_count() > self.get_storage_size():
+            player.warn_message("倉庫の容量が足りません")
+            return
+        take_item_operation = player.item_take(self.shop.target_item_function.get_target_item().type_base64,
+                                               data["data"]["amount"])
+        if not take_item_operation.success():
+            player.warn_message(take_item_operation.message())
+            return
         result = self.add_item_count(data["data"]["amount"])
-        if result and player_mode:
+        if result:
             player.success_message("在庫を補充しました 現在: " + str(self.get_item_count()))
         else:
             player.warn_message("在庫の補充に失敗しました")
 
     def withdraw_item(self, data):
-        player_mode = "player" in data
+        if "player" not in data: return
         if "amount" not in data["data"]: return
-        if player_mode:
-            player: Player = data["player"]
-            if self.get_item_count() < data["data"]["amount"]:
-                player.warn_message("在庫が不足しています")
-                return
+        player: Player = data["player"]
+        if self.get_item_count() < data["data"]["amount"]:
+            player.warn_message("在庫が不足しています")
+            return
+        inventory_space_check_request = player.has_inventory_space()
+        if not inventory_space_check_request.success():
+            player.warn_message(inventory_space_check_request.message())
+            return
 
         take_money_operation = self.remove_item_count(data["data"]["amount"])
         if not take_money_operation:
-            if player_mode: player.warn_message("引き出しに失敗しました")
+            player.warn_message("引き出しに失敗しました")
             return
 
-        if player_mode:
-            result = player.item_give(self.shop.target_item_function.get_target_item().type_base64, data["data"]["amount"])
-            if result.success() and player_mode:
-                player.success_message("引き出しに成功しました 現在:" + str(self.get_item_count()))
-            else:
-                player.warn_message(result.message())
+        result = player.item_give(self.shop.target_item_function.get_target_item().type_base64, data["data"]["amount"])
+        if result.success():
+            player.success_message("引き出しに成功しました 現在:" + str(self.get_item_count()))
+        else:
+            player.warn_message(result.message())
 
     def buy_storage(self, data):
         if "amount" not in data["data"]: return

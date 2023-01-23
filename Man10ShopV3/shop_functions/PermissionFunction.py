@@ -9,7 +9,7 @@ class PermissionFunction(ShopFunction):
     def on_function_init(self):
         self.set_variable("users", {})
 
-    def set_permission(self, player: Player, permission: str):
+    def set_permission(self, player: Player, permission: str, update_db: bool = True):
         default = {
             "name": player.name,
             "uuid": player.uuid,
@@ -20,7 +20,7 @@ class PermissionFunction(ShopFunction):
         if player.get_uuid_formatted() in users:
             default = users[player.get_uuid_formatted()]
 
-        self.set("users." + player.get_uuid_formatted(), default)
+        return self.set("users." + player.get_uuid_formatted(), default, update_db=update_db)
 
     def remove_user(self, player: Player):
         permission_list = self.get("users")
@@ -36,6 +36,7 @@ class PermissionFunction(ShopFunction):
         if result is None:
             return "NONE"
         return result["permission"]
+
     def get_permission_level(self, permission):
         permission_level = 0
         if permission == "OWNER": permission_level = 10

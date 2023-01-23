@@ -60,7 +60,6 @@ class SetVariable:
 
                 if not shop.is_admin() and not shop.permission_function.has_permission_at_least(required_permission, owning_permission):
                     return "permission_insufficient"
-
                 if not shop.set_variable(json_body["key"], json_body["value"], True, player=player):
                     return "error_internal"
 
