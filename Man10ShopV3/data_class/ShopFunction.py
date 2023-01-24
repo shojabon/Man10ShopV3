@@ -25,7 +25,7 @@ class ShopFunction(object):
     def set_variable(self, key, value, permission="MODERATOR", variable_check: Callable = None):
         self.shop.variable_permissions[self.config_prefix + "." + key] = permission
         if self.get(key) is None:
-            self.set(key, value, variable_check=False)
+            self.set(key, value, variable_check=False, update_db=False)
         if variable_check is not None:
             self.shop.variable_check[self.config_prefix + "." + key] = variable_check
 

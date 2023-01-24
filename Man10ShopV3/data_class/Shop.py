@@ -164,9 +164,13 @@ class Shop(object):
         data[key] = value
         self.data = unflatten_dict(data)
 
+        update_data = humps.camelize({key: value})
         if update_db:
+            print(self.get_shop_id(), update_data)
             result = self.api.main.mongo["man10shop_v3"]["shops"].update_one({"shopId": self.get_shop_id()},
-                                                                             {"$set": humps.camelize(self.data)})
+                                                                             {"$set": update_data})
+            # result = self.api.main.mongo["man10shop_v3"]["shops"].update_one({"shopId": self.get_shop_id()},
+            #                                                                  {"$set": humps.camelize(self.data)})
             if result.raw_result["ok"] != 1:
                 return False
             return True
@@ -245,8 +249,8 @@ class Shop(object):
         return current_order
 
     def allowed_to_use_shop(self, order: OrderRequest):
-        for function in self.functions.values():
-            function: ShopFunction = function
+        for function_key in self.get_function_keys():
+            function: ShopFunction = self.functions[function_key]
             if not function.is_function_enabled():
                 continue
             if len(function.allowed_shop_type) != 0 and self.get_shop_type() not in function.allowed_shop_type:
@@ -257,8 +261,8 @@ class Shop(object):
         return True
 
     def execute_per_minute_execution_task(self):
-        for function in self.functions.values():
-            function: ShopFunction = function
+        for function_key in self.get_function_keys():
+            function: ShopFunction = self.functions[function_key]
             if not function.is_function_enabled():
                 continue
             if len(function.allowed_shop_type) != 0 and self.get_shop_type() not in function.allowed_shop_type:

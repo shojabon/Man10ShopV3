@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import datetime
 import json
 import traceback
 import uuid
 from concurrent.futures import ThreadPoolExecutor
+from copy import copy, deepcopy
 from threading import Thread
 from typing import TYPE_CHECKING, Optional
 
@@ -26,6 +28,8 @@ class Man10ShopV3API:
 
         self.shops: dict[str, Shop] = {}
 
+        self.base_shop_object = Shop(self)
+        self.base_shop_object.api = None
     def get_shop_id_from_location(self, sign: Sign):
         query = {"sign.signs." + str(sign.location_id()): {"$exists": True}}
         query = self.main.mongo["man10shop_v3"]["shops"].find_one(query, {"_id": 0, "shopId": 1})
@@ -41,15 +45,15 @@ class Man10ShopV3API:
         if shop_object is None:
             return None
         del shop_object["_id"]
-        shop = Shop(self)
+        shop = self.create_shop_instance()
         shop.from_json(shop_object)
         self.shops[shop_id] = shop
         return self.shops.get(shop_id)
 
     def create_shop(self, owner: Player, shop_type: str, name: str, admin: bool) -> bool:
         try:
-            shop = Shop(self)
-            shop_id = str(uuid.uuid1())
+            shop = self.create_shop_instance()
+            shop_id = str(uuid.uuid4())
             shop.from_json({
                 "shopId": shop_id,
                 "shopType": shop_type,
@@ -99,10 +103,10 @@ class Man10ShopV3API:
             print("req endpoint", self.main.config["api"]["endpoint"].replace("{endpoint}", endpoint) + path)
             if method == "GET":
                 req = requests.get(self.main.config["api"]["endpoint"].replace("{endpoint}", endpoint) + path,
-                                   data=payload, headers={"x-api-key": self.main.config["api"]["key"]})
+                                   data=payload, headers={"x-api-key": self.main.config["api"]["key"]}, verify=False)
             if method == "POST":
                 req = requests.post(self.main.config["api"]["endpoint"].replace("{endpoint}", endpoint) + path,
-                                    data=payload, headers={"x-api-key": self.main.config["api"]["key"]})
+                                    data=payload, headers={"x-api-key": self.main.config["api"]["key"]}, verify=False)
 
             if req.status_code != 200:
                 return None
@@ -129,20 +133,19 @@ class Man10ShopV3API:
             traceback.print_exc()
             return False
 
+    def create_shop_instance(self) -> Shop:
+        shop = deepcopy(self.base_shop_object)
+        shop.api = self
+        return shop
+
     def load_all_shops(self):
-        shops = self.main.mongo["man10shop_v3"]["shops"].find({})
-        def load_shop(shop_data_local):
-            try:
-                del shop_data_local["_id"]
-                shop = Shop(self)
-                shop.from_json(shop_data_local)
-                self.shops[shop.get_shop_id()] = shop
-            except Exception:
-                traceback.print_exc()
-
-        pool = ThreadPoolExecutor(max_workers=30)
-
-        for shop_data in tqdm(shops):
-            pool.submit(load_shop, shop_data)
+        start = datetime.datetime.now().timestamp()
+        shops_query = self.main.mongo["man10shop_v3"]["shops"].find({})
+        for shop in tqdm(shops_query):
+            del shop["_id"]
+            copy_shop: Shop = self.create_shop_instance()
+            copy_shop.from_json(shop)
+            self.shops[copy_shop.get_shop_id()] = copy_shop
+        print("all shops loaded in ", datetime.datetime.now().timestamp() - start)
 
 
