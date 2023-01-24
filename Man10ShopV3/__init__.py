@@ -3,6 +3,7 @@ import queue
 import time
 import traceback
 import uuid
+from datetime import datetime
 from threading import Thread
 
 import humps
@@ -48,6 +49,8 @@ class Man10ShopV3:
                     request: dict = humps.decamelize(request)
                     if "player" in request:
                         player_data = request["player"]
+                        if request["key"] == "shop.order" and self.check_rate_limited(player_data["uuid"]):
+                            continue
                         request["player"] = Player().load_from_json(player_data, self)
 
                     queue_id = uuid.UUID(request["shop_id"]).int%self.config["queue"]["size"]
@@ -59,6 +62,17 @@ class Man10ShopV3:
                 traceback.print_exc()
                 continue
 
+    def check_rate_limited(self, player_uuid: str):
+        rate = self.config["queue"]["rateLimit"]
+        if rate == 0:
+            return False
+        current_time = datetime.now().timestamp()
+        if player_uuid in self.queue_rate_limit_map:
+            time_diff = current_time - self.queue_rate_limit_map.get(player_uuid)
+            if time_diff < rate:
+                return True
+        self.queue_rate_limit_map[player_uuid] = current_time
+        return False
     def process_per_minute_execution_task(self):
         timer = 0
         while self.running:
@@ -95,6 +109,9 @@ class Man10ShopV3:
 
         self.shop_method = ShopMethods(self)
 
+
+        # create queue
+        self.queue_rate_limit_map = {}
         self.main_queue = queue.Queue(maxsize=0)
         self.sub_queue = {}
         Thread(target=self.main_queue_process).start()

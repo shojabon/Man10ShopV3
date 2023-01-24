@@ -31,8 +31,6 @@ class ItemStack(object):
 
     def get_icon_json(self):
         return {
-            "display_name": self.display_name,
-            "lore": self.lore,
             "material": self.material,
             "custom_model_data": self.custom_model_data
         }

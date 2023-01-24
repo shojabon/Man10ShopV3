@@ -230,6 +230,20 @@ class Shop(object):
 
     # shop functions
 
+    def get_function_keys(self):
+        forced_order = []
+        if self.get_shop_type() == "SELL":
+            forced_order = ["target_item", "price"]
+        if self.get_shop_type() == "BUY":
+            forced_order = ["price", "target_item"]
+        current_order = list(self.functions.keys())
+        for order_function in forced_order:
+            if order_function in current_order:
+                current_order.remove(order_function)
+
+        current_order.extend(forced_order)
+        return current_order
+
     def allowed_to_use_shop(self, order: OrderRequest):
         for function in self.functions.values():
             function: ShopFunction = function
@@ -256,14 +270,14 @@ class Shop(object):
         if not self.allowed_to_use_shop(order):
             return False
 
-        for function in self.functions.values():
-            function: ShopFunction = function
+        for function_key in self.get_function_keys():
+            function: ShopFunction = self.functions[function_key]
             if not function.is_function_enabled(): continue
             if len(function.allowed_shop_type) != 0 and self.get_shop_type() not in function.allowed_shop_type: continue
             if not function.perform_action(order): return False
 
-        for function in self.functions.values():
-            function: ShopFunction = function
+        for function_key in self.get_function_keys():
+            function: ShopFunction = self.functions[function_key]
             if not function.is_function_enabled(): continue
             if len(function.allowed_shop_type) != 0 and self.get_shop_type() not in function.allowed_shop_type: continue
             function.after_perform_action(order)
@@ -273,8 +287,8 @@ class Shop(object):
     def get_item_count(self, player: Player):
         result = self.storage_function.get_storage_size()
 
-        for function in self.functions.values():
-            function: ShopFunction = function
+        for function_key in self.get_function_keys():
+            function: ShopFunction = self.functions[function_key]
             if not function.is_function_enabled(): continue
             if len(function.allowed_shop_type) != 0 and self.get_shop_type() not in function.allowed_shop_type: continue
             count = function.item_count(player)
@@ -287,8 +301,8 @@ class Shop(object):
 
     def get_menu_info(self, player: Player):
         result = {}
-        for function in self.functions.values():
-            function: ShopFunction = function
+        for function_key in self.get_function_keys():
+            function: ShopFunction = self.functions[function_key]
             if not function.is_function_enabled(): continue
             if len(function.allowed_shop_type) != 0 and self.get_shop_type() not in function.allowed_shop_type: continue
             info = function.menu_info(player)
@@ -315,8 +329,8 @@ class Shop(object):
         if self.get_shop_type() == "LOOT_BOX":
             result[0] = "§d§lガチャ"
 
-        for function in self.functions.values():
-            function: ShopFunction = function
+        for function_key in self.get_function_keys():
+            function: ShopFunction = self.functions[function_key]
             if not function.is_function_enabled(): continue
             if len(function.allowed_shop_type) != 0 and self.get_shop_type() not in function.allowed_shop_type: continue
             info = function.sign_information(result)
@@ -328,8 +342,8 @@ class Shop(object):
 
     def get_log_data(self, order: OrderRequest):
         result = {}
-        for function in self.functions.values():
-            function: ShopFunction = function
+        for function_key in self.get_function_keys():
+            function: ShopFunction = self.functions[function_key]
             if not function.is_function_enabled(): continue
             if len(function.allowed_shop_type) != 0 and self.get_shop_type() not in function.allowed_shop_type: continue
             info = function.log_data(order)
