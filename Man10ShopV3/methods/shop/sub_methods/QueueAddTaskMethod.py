@@ -6,8 +6,6 @@ from typing import TYPE_CHECKING, Optional
 
 import humps
 
-from Man10ShopV3.data_class.Player import Player
-from Man10ShopV3.data_class.Shop import Shop
 from Man10ShopV3.common_variables.common_variables import player_schema
 from utils.JsonSchemaWrapper import flask_json_schema
 from utils.MatResponseWrapper import flask_mat_response_wrapper
@@ -47,7 +45,8 @@ class QueueAddTaskMethod:
         def queue_add(json_body: dict):
             try:
                 json_body["registered_time"] = datetime.datetime.now()
-                self.methods.main.mongo["man10shop_v3"]["queue"].insert_one(humps.camelize(json_body))
+                # self.methods.main.mongo["man10shop_v3"]["queue"].insert_one(humps.camelize(json_body))
+                self.methods.main.main_queue.put(humps.camelize(json_body))
                 return "success"
             except Exception as e:
                 traceback.print_exc()

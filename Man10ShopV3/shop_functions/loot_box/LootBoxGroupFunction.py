@@ -28,7 +28,7 @@ class LootBoxGroupFunction(ShopFunction):
         return True
 
     def after_perform_action(self, order: OrderRequest):
-        order.player.execute_command_in_server("mshopv3 lootBoxPlay " + self.shop.get_shop_id() + " " + order.player.uuid + " " + order.log_id)
+        order.player.execute_command_in_server("mshop lootBoxPlay " + self.shop.get_shop_id() + " " + order.player.uuid + " " + order.log_id)
 
     # queue task
     def log_loot_box_win_task(self, data):

@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import traceback
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from Man10ShopV3.data_class.Player import Player
-from Man10ShopV3.data_class.Shop import Shop
 from Man10ShopV3.common_variables.common_variables import player_schema
 from utils.JsonSchemaWrapper import flask_json_schema
 from utils.MatResponseWrapper import flask_mat_response_wrapper
@@ -53,7 +52,7 @@ class ListShopsMethod:
                         "shopId": shop.get_shop_id(),
                         "name": shop.name_function.get_name(),
                         "shopType": shop.get_shop_type_string(),
-                        "icon": shop.target_item_function.get_target_item().type_base64,
+                        "icon": shop.target_item_function.get_target_item().get_icon_json(),
                         "permission": permission,
                         "money": shop.money_function.get_money(),
                         "itemCount": shop.storage_function.get_item_count(),

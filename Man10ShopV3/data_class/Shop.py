@@ -65,18 +65,6 @@ class Shop(object):
         self.target_item_function: TargetItemFunction = self.register_function("target_item", TargetItemFunction())
         self.permission_function: PermissionFunction = self.register_function("permission", PermissionFunction())
 
-        # general
-
-        self.name_function: NameFunction = self.register_function("name", NameFunction())
-        self.secret_price_mode_function: SecretPriceModeFunction = self.register_function("secret_price_mode",
-                                                                                          SecretPriceModeFunction())
-        self.sign_function: SignFunction = self.register_function("sign", SignFunction())
-        self.category_function: CategoryFunction = self.register_function("category", CategoryFunction())
-        self.delete_function: DeleteShopFunction = self.register_function("delete", DeleteShopFunction())
-        self.price_function: PriceFunction = self.register_function("price", PriceFunction())
-        self.shop_enabled_function: ShopEnabledFunction = self.register_function("shop_enabled", ShopEnabledFunction())
-        self.random_price_function: RandomPriceFunction = self.register_function("random_price", RandomPriceFunction())
-
         # allowed to use
         self.disabled_from_function: DisabledFromFunction = self.register_function("disabled_from",
                                                                                    DisabledFromFunction())
@@ -100,6 +88,18 @@ class Shop(object):
 
         self.ip_limit_function: IpLimitFunction = self.register_function(
             "ip_limit", IpLimitFunction())
+
+        # general
+
+        self.name_function: NameFunction = self.register_function("name", NameFunction())
+        self.secret_price_mode_function: SecretPriceModeFunction = self.register_function("secret_price_mode",
+                                                                                          SecretPriceModeFunction())
+        self.sign_function: SignFunction = self.register_function("sign", SignFunction())
+        self.category_function: CategoryFunction = self.register_function("category", CategoryFunction())
+        self.delete_function: DeleteShopFunction = self.register_function("delete", DeleteShopFunction())
+        self.price_function: PriceFunction = self.register_function("price", PriceFunction())
+        self.shop_enabled_function: ShopEnabledFunction = self.register_function("shop_enabled", ShopEnabledFunction())
+        self.random_price_function: RandomPriceFunction = self.register_function("random_price", RandomPriceFunction())
 
         # barter
         self.set_barter_function: SetBarterFunction = self.register_function("set_barter", SetBarterFunction())

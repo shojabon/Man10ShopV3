@@ -46,6 +46,7 @@ class SetVariable:
                 owning_permission = "OWNER"
                 required_permission = "MODERATOR"
                 shop = self.methods.main.api.get_shop(json_body["shop_id"])
+                player = None
                 if shop is None:
                     return "shop_invalid"
 

@@ -1,6 +1,4 @@
 from __future__ import annotations
-import codecs
-import hashlib
 
 from Man10ShopV3.data_class.ItemStack import ItemStack
 from Man10ShopV3.data_class.OrderRequest import OrderRequest

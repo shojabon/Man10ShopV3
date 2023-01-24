@@ -18,9 +18,10 @@ class LootBoxPaymentFunction(ShopFunction):
         return self.get("cash")
 
     def get_item(self) -> Optional[ItemStack]:
-        if self.get("item") is None:
+        item_data = self.get("item")
+        if item_data is None:
             return None
-        return ItemStack().from_json(self.get("item"))
+        return ItemStack().from_json(item_data)
 
     # =========
 

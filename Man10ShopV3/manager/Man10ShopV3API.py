@@ -3,10 +3,13 @@ from __future__ import annotations
 import json
 import traceback
 import uuid
+from concurrent.futures import ThreadPoolExecutor
+from threading import Thread
 from typing import TYPE_CHECKING, Optional
 
 import humps
 import requests
+from tqdm import tqdm
 
 from Man10ShopV3.data_class.Player import Player
 from Man10ShopV3.data_class.Shop import Shop
@@ -77,10 +80,18 @@ class Man10ShopV3API:
         try:
             query = {"admin": True}
             query = self.main.mongo["man10shop_v3"]["shops"].find(query, {"_id": 0, "shopId": 1})
-            query = [self.get_shop(x["shopId"]) for x in query]
-            return [x for x in query if x is not None]
         except Exception:
+            traceback.print_exc()
             return []
+        result = []
+        for query_data in query:
+            try:
+                result.append(self.get_shop(query_data["shopId"]))
+            except Exception:
+                traceback.print_exc()
+                continue
+
+        return [x for x in result if x is not None]
 
     def http_request(self, endpoint: str, path: str, method: str = "POST", payload: dict = None, return_json: bool = True):
         try:
@@ -117,3 +128,21 @@ class Man10ShopV3API:
         except Exception:
             traceback.print_exc()
             return False
+
+    def load_all_shops(self):
+        shops = self.main.mongo["man10shop_v3"]["shops"].find({})
+        def load_shop(shop_data_local):
+            try:
+                del shop_data_local["_id"]
+                shop = Shop(self)
+                shop.from_json(shop_data_local)
+                self.shops[shop.get_shop_id()] = shop
+            except Exception:
+                traceback.print_exc()
+
+        pool = ThreadPoolExecutor(max_workers=30)
+
+        for shop_data in tqdm(shops):
+            pool.submit(load_shop, shop_data)
+
+

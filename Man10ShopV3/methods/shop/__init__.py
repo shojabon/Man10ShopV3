@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from functools import wraps
 from typing import TYPE_CHECKING
 
 from flask import Blueprint
 
 from Man10ShopV3.methods.shop.sub_methods.CreateShopMethod import CreateShopMethod
+from Man10ShopV3.methods.shop.sub_methods.GetAllShopIdsMethod import GetAllShopIdsMethod
 from Man10ShopV3.methods.shop.sub_methods.QueueAddTaskMethod import QueueAddTaskMethod
 from Man10ShopV3.methods.shop.sub_methods.SetVariable import SetVariable
 from Man10ShopV3.methods.shop.sub_methods.ShopInformationMethod import ShopInformationMethod
@@ -24,7 +24,7 @@ class ShopMethods:
         ShopInformationMethod(self)
         SetVariable(self)
         CreateShopMethod(self)
-
+        GetAllShopIdsMethod(self)
         QueueAddTaskMethod(self)
 
         self.main.flask.register_blueprint(self.blueprint)
