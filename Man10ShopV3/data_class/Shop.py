@@ -97,9 +97,9 @@ class Shop(object):
         self.sign_function: SignFunction = self.register_function("sign", SignFunction())
         self.category_function: CategoryFunction = self.register_function("category", CategoryFunction())
         self.delete_function: DeleteShopFunction = self.register_function("delete", DeleteShopFunction())
-        self.price_function: PriceFunction = self.register_function("price", PriceFunction())
         self.shop_enabled_function: ShopEnabledFunction = self.register_function("shop_enabled", ShopEnabledFunction())
         self.random_price_function: RandomPriceFunction = self.register_function("random_price", RandomPriceFunction())
+        self.price_function: PriceFunction = self.register_function("price", PriceFunction())
 
         # barter
         self.set_barter_function: SetBarterFunction = self.register_function("set_barter", SetBarterFunction())
@@ -237,9 +237,9 @@ class Shop(object):
     def get_function_keys(self):
         forced_order = []
         if self.get_shop_type() == "SELL":
-            forced_order = ["target_item", "price"]
+            forced_order = ["target_item", "price", "shop_enabled"]
         if self.get_shop_type() == "BUY":
-            forced_order = ["price", "target_item"]
+            forced_order = ["price", "target_item", "shop_enabled"]
         current_order = list(self.functions.keys())
         for order_function in forced_order:
             if order_function in current_order:

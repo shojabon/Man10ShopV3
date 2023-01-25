@@ -144,6 +144,7 @@ class Man10ShopV3API:
         for shop in tqdm(shops_query):
             del shop["_id"]
             copy_shop: Shop = self.create_shop_instance()
+            print(shop)
             copy_shop.from_json(shop)
             self.shops[copy_shop.get_shop_id()] = copy_shop
         print("all shops loaded in ", datetime.datetime.now().timestamp() - start)

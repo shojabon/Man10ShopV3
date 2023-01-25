@@ -4,6 +4,8 @@ import humps
 from flask import request
 from jsonschema.validators import validate
 
+from utils.JsonTools import flatten_dict, unflatten_dict
+
 
 def merge_dictionaries(origin: dict, target: dict):
     for key in target.keys():
@@ -11,7 +13,8 @@ def merge_dictionaries(origin: dict, target: dict):
         if key not in origin:
             origin[key] = target[key]
             continue
-
+        if origin[key] is None:
+            origin[key] = {}
         if type(v) != dict:
             origin[key] = target[key]
             continue
@@ -44,3 +47,13 @@ def flask_json_schema(schema: dict):
         return wrapped
 
     return decorator
+
+base = {
+    "test": None,
+    "b": {"test1": 2}
+}
+target = {
+    "test": {"a": 1},
+    "b": {"test1": 1}
+}
+print(merge_dictionaries(base, target))
