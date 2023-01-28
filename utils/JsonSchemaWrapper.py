@@ -47,13 +47,3 @@ def flask_json_schema(schema: dict):
         return wrapped
 
     return decorator
-
-base = {
-    "test": None,
-    "b": {"test1": 2}
-}
-target = {
-    "test": {"a": 1},
-    "b": {"test1": 1}
-}
-print(merge_dictionaries(base, target))

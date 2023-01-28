@@ -29,6 +29,9 @@ class TargetItemFunction(ShopFunction):
     def on_set_target_item(self, shop: Shop, player: Player, new_value):
         if player is None:
             return False
+        if shop.storage_function.users_in_storage:
+            player.warn_message("倉庫編集中にアイテムを変更することはできません")
+            return False
         if not shop.is_admin() and shop.storage_function.get_item_count() != 0:
             player.warn_message("アイテム変更時は在庫が空なくてはいけません")
             return False

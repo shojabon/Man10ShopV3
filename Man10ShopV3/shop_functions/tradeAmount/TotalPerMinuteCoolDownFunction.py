@@ -77,6 +77,4 @@ class TotalPerMinuteCoolDownFunction(ShopFunction):
         return count
 
     def is_function_enabled(self) -> bool:
-        if self.get_time() == 0 or self.get_amount() == 0:
-            return False
-        return True
+        return self.get_time() != 0 and self.get_amount() != 0

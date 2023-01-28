@@ -26,7 +26,7 @@ class LootBoxPaymentFunction(ShopFunction):
     # =========
 
     def is_function_enabled(self) -> bool:
-        return self.get_cash() == 0 and self.get_item() is None
+        return self.get_cash() != 0 or self.get_item() is not None
 
     def is_allowed_to_use_shop(self, order: OrderRequest) -> bool:
         if self.get_cash() != 0:
@@ -34,19 +34,22 @@ class LootBoxPaymentFunction(ShopFunction):
                 order.player.warn_message("現金が足りません")
                 return False
         if self.get_item() is not None:
-            if not order.player.item_check(self.get_item().type_base64, self.get_item().amount):
-                order.player.warn_message("アイテムが足りません")
+            check_item_request = order.player.item_check(self.get_item().type_base64, self.get_item().amount)
+            if not check_item_request.success():
+                order.player.warn_message(check_item_request.message())
                 return False
         return True
 
     def perform_action(self, order: OrderRequest) -> bool:
         if self.get_cash() != 0:
-            if not order.player.take_money(self.get_cash()):
-                order.player.warn_message("現金が足りません")
+            take_money_request = order.player.take_money(self.get_cash())
+            if not take_money_request.success():
+                order.player.warn_message(take_money_request.message())
                 return False
         if self.get_item() is not None:
-            if not order.player.item_take(self.get_item().type_base64, self.get_item().amount):
-                order.player.warn_message("アイテムが足りません")
+            take_item_request = order.player.item_take(self.get_item().type_base64, self.get_item().amount)
+            if not take_item_request.success():
+                order.player.warn_message(take_item_request.message())
                 return False
         return True
 
