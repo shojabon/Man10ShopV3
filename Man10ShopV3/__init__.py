@@ -54,6 +54,8 @@ class Man10ShopV3:
                         request["player"] = Player().load_from_json(player_data, self)
 
                     queue_id = uuid.UUID(request["shop_id"]).int%self.config["queue"]["size"]
+                    if request["key"] == "shop.order" and self.config["queue"]["maxOrders"] != 0 and self.sub_queue[queue_id].qsize() >= self.config["queue"]["maxOrders"]:
+                        continue
                     self.sub_queue[queue_id].put(request)
 
                 time.sleep(0.1)
