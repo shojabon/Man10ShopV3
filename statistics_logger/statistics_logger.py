@@ -1,7 +1,7 @@
 import json
 
 from pymongo import MongoClient
-import MySQLdb
+import mysql.connector
 
 file = open("config.json", "r")
 config = json.loads(file.read())
@@ -25,7 +25,7 @@ for shop in mongo["man10shop_v3"]["shops"].find({"delete.deleted": False}):
         result[owner["uuid"]] = owner
     result[owner["uuid"]]["money"] += money
 
-connection = MySQLdb.connect(
+connection = mysql.connector.connect(
     host=config["mysql"]["host"],
     port=config["mysql"]["port"],
     user=config["mysql"]["user"],
