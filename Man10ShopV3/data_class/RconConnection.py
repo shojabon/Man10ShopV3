@@ -5,7 +5,7 @@ import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 
-from mcrcon import MCRcon
+from utils.MatMCRcon import MatMCRcon
 
 
 class RconConnection(object):
@@ -15,7 +15,7 @@ class RconConnection(object):
         self.port = port
         self.password = password
 
-        self.connections: dict[int, MCRcon] = {}
+        self.connections: dict[int, MatMCRcon] = {}
         self.last_tried_to_connect: dict[int, int] = {}
         self.locks: dict[int, threading.Lock] = {}
         self.retry_connection_in = 3
@@ -28,7 +28,7 @@ class RconConnection(object):
             queue_id] < 3:
             return False
         try:
-            self.connections[queue_id] = MCRcon(self.host, self.password, self.port)
+            self.connections[queue_id] = MatMCRcon(self.host, self.password, self.port)
             self.connections[queue_id].connect()
             return True
         except Exception:
@@ -51,11 +51,12 @@ class RconConnection(object):
             self.locks[queue_id] = threading.Lock()
         self.locks[queue_id].acquire()
 
-        if queue_id not in self.connections:
-            if not self.open_connection(queue_id):
-                return None
         try:
-            rcon: MCRcon = self.connections[queue_id]
+            if queue_id not in self.connections:
+                if not self.open_connection(queue_id):
+                    return None
+
+            rcon: MatMCRcon = self.connections[queue_id]
             result = rcon.command(command)[:-1]
             self.locks[queue_id].release()
             return result
