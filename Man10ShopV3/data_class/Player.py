@@ -79,10 +79,12 @@ class Player(object):
 
     # ======= minecraft functions ========
     def send_message(self, message):
-        return self.main.api.http_request(self.server, "/chat/tell", "POST", {
-            "message": message,
-            "playerUuid": self.uuid
-        })
+        def task():
+            self.main.api.http_request(self.server, "/chat/tell", "POST", {
+                "message": message,
+                "playerUuid": self.uuid
+            })
+        self.main.thread_pool.submit(task)
 
     def execute_command_in_server(self, command: str):
         result = self.main.api.execute_command_in_server(self.server, command)
@@ -119,7 +121,14 @@ class Player(object):
 
     # economy
 
-    def get_balance(self) -> float:
+    def get_balance(self) -> float | None:
+        # command = "mshop moneyGet " + self.uuid
+        # result = self.main.api.execute_command_in_server(self.server, command)
+        # if result is None:
+        #     return None
+        # result = result.split(",")
+        # if result[0] != "success": return None
+        # return float(result[1])
         player_data = self.get_player_data()
         return player_data["balance"]
 

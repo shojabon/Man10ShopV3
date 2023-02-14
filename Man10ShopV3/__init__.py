@@ -3,6 +3,7 @@ import queue
 import time
 import traceback
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from threading import Thread
 
@@ -12,6 +13,7 @@ from pymongo import MongoClient
 
 from Man10ShopV3.data_class.OrderRequest import OrderRequest
 from Man10ShopV3.data_class.Player import Player
+from Man10ShopV3.data_class.RconConnection import RconConnection
 from Man10ShopV3.manager.Man10ShopV3API import Man10ShopV3API
 from Man10ShopV3.methods.shop import ShopMethods
 
@@ -94,6 +96,7 @@ class Man10ShopV3:
         self.running = True
         self.flask.url_map.strict_slashes = False
         self.config = {}
+        self.thread_pool = ThreadPoolExecutor(max_workers=30)
 
         # load config
 
@@ -110,6 +113,16 @@ class Man10ShopV3:
         self.api.load_all_shops()
 
         self.shop_method = ShopMethods(self)
+
+        self.command_queue: dict[str, RconConnection] = {}
+        # command queue
+        for server in self.config["rconServers"].keys():
+            server_information = self.config["rconServers"][server]
+            self.command_queue[server] = RconConnection(
+                host=server_information["host"],
+                port=server_information["port"],
+                password=server_information["password"]
+            )
 
 
         # create queue
