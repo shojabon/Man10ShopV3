@@ -25,6 +25,8 @@ class Player(object):
 
     server: str = None
 
+    command_queue_material: str = None
+
     def load_from_json(self, data: dict, main: Man10ShopV3):
         self.name = data.get("name")
         self.main = main
@@ -36,6 +38,9 @@ class Player(object):
 
         self.inventory = data.get("inventory")
         return self
+
+    def set_command_queue_material(self, material: str):
+        self.command_queue_material = str(material)
 
     def get_json(self):
         data = {
@@ -87,28 +92,24 @@ class Player(object):
         self.main.thread_pool.submit(task)
 
     def execute_command_in_server(self, command: str):
-        result = self.main.api.execute_command_in_server(self.server, command)
+        result = self.main.api.execute_command_in_server(self.server, command, False, self.command_queue_material)
         return RequestResponse(result)
 
     def item_give(self, item_base64, amount: int):
         command = "mshop itemGive " + self.uuid + " " + item_base64 + " " + str(amount)
-        result = self.main.api.execute_command_in_server(self.server, command)
-        return RequestResponse(result)
+        return self.execute_command_in_server(command)
 
     def item_take(self, item_base64, amount: int):
         command = "mshop itemTake " + self.uuid + " " + item_base64 + " " + str(amount)
-        result = self.main.api.execute_command_in_server(self.server, command)
-        return RequestResponse(result)
+        return self.execute_command_in_server(command)
 
     def has_inventory_space(self):
         command = "mshop inventoryHasSpace " + self.uuid
-        result = self.main.api.execute_command_in_server(self.server, command)
-        return RequestResponse(result)
+        return self.execute_command_in_server(command)
 
     def item_check(self, item_base64, amount: int):
         command = "mshop itemCheck " + self.uuid + " " + item_base64 + " " + str(amount)
-        result = self.main.api.execute_command_in_server(self.server, command)
-        return RequestResponse(result)
+        return self.execute_command_in_server(command)
 
     def success_message(self, message: str):
         return self.send_message("§6[§eMan10Shop§dV3§6]§a§l" + message)
@@ -133,12 +134,12 @@ class Player(object):
         return player_data["balance"]
 
     def give_money(self, amount: float):
-        result = self.main.api.execute_command_in_server(self.server, "mshop moneyGive " + self.uuid + " " + str(amount))
-        return RequestResponse(result)
+        command = "mshop moneyGive " + self.uuid + " " + str(amount)
+        return self.execute_command_in_server(command)
 
     def take_money(self, amount: float):
-        result = self.main.api.execute_command_in_server(self.server, "mshop moneyTake " + self.uuid + " " + str(amount))
-        return RequestResponse(result)
+        command = "mshop moneyTake " + self.uuid + " " + str(amount)
+        return self.execute_command_in_server(command)
 
     # uuid tools
     def get_uuid_formatted(self):

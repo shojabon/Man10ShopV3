@@ -119,10 +119,10 @@ class Man10ShopV3API:
             traceback.print_exc()
             return None
 
-    def execute_command_in_server(self, endpoint, command, execute_async: bool = False):
+    def execute_command_in_server(self, endpoint, command, execute_async: bool = False, queue_key: str = None):
         if execute_async:
-            return self.main.command_queue.get(endpoint).execute_command_async(command, 0)
-        return self.main.command_queue.get(endpoint).execute_command(command, 0)
+            return self.main.command_queue.get(endpoint).execute_command_async(command, RconConnection.get_queue_id_from_text(queue_key, 10))
+        return self.main.command_queue.get(endpoint).execute_command(command, RconConnection.get_queue_id_from_text(queue_key, 10))
         result = self.main.api.http_request(endpoint, "/server/exec", "POST", {
             "command": command
         }, False)

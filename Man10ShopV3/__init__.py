@@ -51,13 +51,15 @@ class Man10ShopV3:
                     request: dict = humps.decamelize(request)
                     if "player" in request:
                         player_data = request["player"]
-                        if request["key"] == "shop.order" and self.check_rate_limited(player_data["uuid"]):
-                            continue
-                        request["player"] = Player().load_from_json(player_data, self)
+                        # if request["key"] == "shop.order" and self.check_rate_limited(player_data["uuid"]):
+                        #     continue
+                        player_object = Player().load_from_json(player_data, self)
+                        player_object.set_command_queue_material(request["shop_id"])
+                        request["player"] = player_object
 
                     queue_id = uuid.UUID(request["shop_id"]).int%self.config["queue"]["size"]
-                    if request["key"] == "shop.order" and self.config["queue"]["maxOrders"] != 0 and self.sub_queue[queue_id].qsize() >= self.config["queue"]["maxOrders"]:
-                        continue
+                    # if request["key"] == "shop.order" and self.config["queue"]["maxOrders"] != 0 and self.sub_queue[queue_id].qsize() >= self.config["queue"]["maxOrders"]:
+                    #     continue
                     self.sub_queue[queue_id].put(request)
 
                 time.sleep(0.1)

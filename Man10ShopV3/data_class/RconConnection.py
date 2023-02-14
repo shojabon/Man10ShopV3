@@ -1,5 +1,6 @@
 import datetime
 import hashlib
+import threading
 import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
@@ -16,6 +17,7 @@ class RconConnection(object):
 
         self.connections: dict[int, MCRcon] = {}
         self.last_tried_to_connect: dict[int, int] = {}
+        self.locks: dict[int, threading.Lock] = {}
         self.retry_connection_in = 3
         self.thread_pool = ThreadPoolExecutor(max_workers=30)
 
@@ -45,16 +47,24 @@ class RconConnection(object):
             return
 
     def execute_command(self, command: str, queue_id: int):
+        if queue_id not in self.locks:
+            self.locks[queue_id] = threading.Lock()
+        self.locks[queue_id].acquire()
+
         if queue_id not in self.connections:
             if not self.open_connection(queue_id):
                 return None
-
         try:
             rcon: MCRcon = self.connections[queue_id]
-            return rcon.command(command)[:-1]
+            result = rcon.command(command)[:-1]
+            self.locks[queue_id].release()
+            return result
         except Exception:
             traceback.print_exc()
             self.close_connection(queue_id)
+
+            self.locks[queue_id].release()
+            del self.locks[queue_id]
             return None
 
     def execute_command_async(self, command: str, queue_id: int):
@@ -65,13 +75,10 @@ class RconConnection(object):
     @staticmethod
     def get_queue_id_from_text(material: str, max_queue_size: int):
         md5 = hashlib.md5()
+        if material is None:
+            material = ""
         md5.update(material.encode("utf-8"))
         md5 = md5.hexdigest()
         return int.from_bytes(str(md5).encode("utf-8"), "big") % max_queue_size
 
 
-if __name__ == '__main__':
-    test = RconConnection("127.0.0.1", 25575, "testpassword")
-    # for x in range(100):
-    result = test.execute_command("mshop moneyGet d17c062a-be66-3ad7-ade9-601833350b57", 0)
-    print(result)
