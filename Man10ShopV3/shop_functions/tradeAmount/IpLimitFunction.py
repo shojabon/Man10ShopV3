@@ -9,6 +9,8 @@ from Man10ShopV3.data_class.ShopFunction import ShopFunction
 class IpLimitFunction(ShopFunction):
     allowed_shop_type = []
 
+    ip_tables_cache = {}
+
     def on_function_init(self):
         self.set_variable("count", 0)
         self.set_variable("time", 0)
@@ -21,32 +23,20 @@ class IpLimitFunction(ShopFunction):
 
     def get_player_alts_in_time(self, player: Player):
         try:
-            result = self.shop.api.main.mongo["man10shop_v3"]["trade_log"].aggregate(
-                [
-                    {
-                        "$match": {
-                            "shopId": self.shop.get_shop_id(),
-                            "player.ipAddress": player.ip_address,
-                            "time": {
-                                "$gte": datetime.datetime.fromtimestamp(datetime.datetime.now().timestamp() - self.get_time() * 60)
-                            },
-                        }
-                    },
-                    {
-                        "$group": {
-                            "_id": "$player.uuid",
-                            "uuid": {
-                                "$first": "$player.uuid"
-                            },
-                            "name": {
-                                "$first": "$player.name"
-                            }
-                        }
-                    }
-                ]
-            )
-            result = [x for x in result]
-            return [x["uuid"] for x in result], [x["name"] for x in result]
+            if player.ip_address not in IpLimitFunction.ip_tables_cache:
+                ip_table_data = self.shop.api.main.mongo["man10shop_v3"]["iptables"].find_one({"ip": player.ip_address})
+                if ip_table_data is not None:
+                    IpLimitFunction.ip_tables_cache[ip_table_data["ip"]] = ip_table_data["accounts"]
+            data = IpLimitFunction.ip_tables_cache.get(player.ip_address)
+            if data is None:
+                data = {}
+
+            final_data = {}
+            for player_uuid in data.keys():
+                if data[player_uuid]["lastSeenTime"].timestamp() >= datetime.datetime.now().timestamp() - 60 * self.get_time():
+                    final_data[player_uuid] = data[player_uuid]
+
+            return [x["uuid"] for x in final_data.values()], [x["name"] for x in final_data.values()]
         except Exception:
             traceback.print_exc()
             return None
@@ -69,5 +59,19 @@ class IpLimitFunction(ShopFunction):
             order.player.warn_message(" ".join(alt_names) + "です")
             return False
         return True
+
+    def after_perform_action(self, order: OrderRequest):
+        self.shop.api.main.mongo["man10shop_v3"]["iptables"].update_one(
+            {"ip": order.player.ip_address},
+            {"$set":{
+                "accounts." + order.player.uuid: {
+                    "uuid": order.player.uuid,
+                    "name": order.player.name,
+                    "lastSeenTime": datetime.datetime.now()
+                }
+            }},
+            upsert=True
+        )
+        del IpLimitFunction.ip_tables_cache[order.player.ip_address]
 
 

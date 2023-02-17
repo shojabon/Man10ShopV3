@@ -13,6 +13,7 @@ class TotalPerMinuteCoolDownFunction(ShopFunction):
     def on_function_init(self):
         self.set_variable("time", 0)
         self.set_variable("amount", 0)
+        self.set_variable("trade_log", [])
 
     def set_time(self, time: int):
         return self.set("time", time)
@@ -26,32 +27,26 @@ class TotalPerMinuteCoolDownFunction(ShopFunction):
     def get_amount(self) -> int:
         return self.get("amount")
 
+    def get_trade_log(self):
+        return self.get("trade_log")
+
+    def set_trade_log(self, log):
+        return self.set("trade_log", log)
+
     # =====
 
     def in_time_trade_count(self):
         try:
-            result = self.shop.api.main.mongo["man10shop_v3"]["trade_log"].aggregate([
-                {
-                    "$match": {
-                        "shopId": self.shop.get_shop_id(),
-                        "time": {
-                            "$gte": datetime.datetime.fromtimestamp(
-                                datetime.datetime.now().timestamp() - self.get_time() * 60)
-                        }
-                    }
-                },
-                {
-                    "$group": {
-                        "_id": "$shopId",
-                        "total": {"$sum": "$orderData.amount"}
-                    }
+            trade_log = self.get_trade_log()
+            bought_count = 0
+            new_log = []
+            for log in trade_log:
+                if log["time"].timestamp() < datetime.datetime.now().timestamp() - self.get_time() * 60:
+                    continue
+                bought_count += log["amount"]
+                new_log.append(log)
 
-                }
-            ])
-            result = [x for x in result]
-            if len(result) == 0:
-                return 0
-            return result[0]["total"]
+            return bought_count
         except Exception:
             traceback.print_exc()
             return None
@@ -65,6 +60,11 @@ class TotalPerMinuteCoolDownFunction(ShopFunction):
             order.player.warn_message("時間内の最大取引数に達しています")
             return False
         return True
+
+    def after_perform_action(self, order: OrderRequest):
+        trade_log = self.get_trade_log()
+        trade_log.append({"time": datetime.datetime.now(), "amount": order.amount})
+        self.set_trade_log(trade_log)
 
     def item_count(self, player: Player) -> Optional[int]:
         if player is None:

@@ -10,6 +10,9 @@ from Man10ShopV3.data_class.ShopFunction import ShopFunction
 class PerMinuteCoolDownFunction(ShopFunction):
     allowed_shop_type = []
 
+    time_cache = {}
+    # uuid : amount, first_trade_time,
+
     def on_function_init(self):
         self.set_variable("time", 0)
         self.set_variable("amount", 0)
@@ -30,46 +33,42 @@ class PerMinuteCoolDownFunction(ShopFunction):
 
     def player_in_time_trade_count(self, player: Player):
         try:
-            result = self.shop.api.main.mongo["man10shop_v3"]["trade_log"].aggregate([
-                {
-                    "$match": {
-                        "shopId": self.shop.get_shop_id(),
-                        "player.uuid": player.uuid,
-                        "time": {
-                            "$gte": datetime.datetime.fromtimestamp(
-                                datetime.datetime.now().timestamp() - self.get_time() * 60)
-                        }
-                    }
-                },
-                {
-                    "$group": {
-                        "_id": "$player.uuid",
-                        "total": {"$sum": "$orderData.amount"}
-                    }
+            trade_log = player.get_data(self, "trade_log", [])
+            bought_count = 0
+            new_log = []
+            for log in trade_log:
+                if log["time"].timestamp() < datetime.datetime.now().timestamp() - self.get_time() * 60:
+                    continue
+                bought_count += log["amount"]
+                new_log.append(log)
 
-                }
-            ])
-            result = [x for x in result]
-            if len(result) == 0:
-                return 0
-            return result[0]["total"]
+            return bought_count
         except Exception:
             traceback.print_exc()
             return None
 
     def is_allowed_to_use_shop(self, order: OrderRequest) -> bool:
         player_trade_count_in_time = self.player_in_time_trade_count(order.player)
+
         if player_trade_count_in_time is None:
             order.player.warn_message("内部エラーが発生しました")
             return False
+
         if player_trade_count_in_time + order.amount > self.get_amount():
             order.player.warn_message("時間内の最大取引数に達しています")
             return False
+
         return True
+
+    def after_perform_action(self, order: OrderRequest):
+        trade_log = order.player.get_data(self, "trade_log", [])
+        trade_log.append({"time": datetime.datetime.now(), "amount": order.amount})
+        order.player.set_data(self, "trade_log", trade_log)
 
     def item_count(self, player: Player) -> Optional[int]:
         if player is None:
             return 0
+
         count = self.get_amount() - self.player_in_time_trade_count(player)
         if self.shop.is_admin():
             return -count

@@ -14,7 +14,6 @@ import requests
 from tqdm import tqdm
 
 from Man10ShopV3.data_class.Player import Player
-from Man10ShopV3.data_class.RconConnection import RconConnection
 from Man10ShopV3.data_class.Shop import Shop
 from Man10ShopV3.data_class.Sign import Sign
 
@@ -119,11 +118,8 @@ class Man10ShopV3API:
             traceback.print_exc()
             return None
 
-    def execute_command_in_server(self, endpoint, command, execute_async: bool = False, queue_key: str = None):
-        if execute_async:
-            return self.main.command_queue.get(endpoint).execute_command_async(command, RconConnection.get_queue_id_from_text(queue_key, 10))
-        return self.main.command_queue.get(endpoint).execute_command(command, RconConnection.get_queue_id_from_text(queue_key, 10))
-        result = self.main.api.http_request(endpoint, "/server/exec", "POST", {
+    def execute_command_in_server(self, endpoint, command):
+        result = self.main.api.http_request(endpoint, "/server/scommand", "POST", {
             "command": command
         }, False)
         print("executing command", command, "in server", endpoint, "result", result)

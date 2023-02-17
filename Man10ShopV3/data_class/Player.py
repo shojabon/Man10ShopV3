@@ -15,7 +15,6 @@ if TYPE_CHECKING:
     from Man10ShopV3.data_class.ShopFunction import ShopFunction
     from Man10ShopV3 import Man10ShopV3
 
-
 class Player(object):
     main: Man10ShopV3 = None
 
@@ -25,7 +24,7 @@ class Player(object):
 
     server: str = None
 
-    command_queue_material: str = None
+    player_data_cache = {}
 
     def load_from_json(self, data: dict, main: Man10ShopV3):
         self.name = data.get("name")
@@ -39,9 +38,6 @@ class Player(object):
         self.inventory = data.get("inventory")
         return self
 
-    def set_command_queue_material(self, material: str):
-        self.command_queue_material = str(material)
-
     def get_json(self):
         data = {
             "uuid": self.uuid,
@@ -53,6 +49,8 @@ class Player(object):
 
     # ======= data store =========
     def set_data(self, shop_function: ShopFunction, key: str, data):
+        if self.uuid in Player.player_data_cache:
+            del Player.player_data_cache[self.uuid]
         key = shop_function.shop.get_shop_id() + "." + shop_function.config_prefix + "." + key
         if data is None:
             self.main.mongo["man10shop_v3"]["player_data"].update_one({
@@ -68,11 +66,16 @@ class Player(object):
             return True
 
     def get_data(self, shop_function: ShopFunction, key: str, default = None):
-        result = self.main.mongo["man10shop_v3"]["player_data"].find_one({"uuid": self.uuid})
+        if self.uuid not in Player.player_data_cache:
+            result = self.main.mongo["man10shop_v3"]["player_data"].find_one({"uuid": self.uuid})
+            if result is None:
+                if default is not None:
+                    self.set_data(shop_function, key, default)
+            Player.player_data_cache[self.uuid] = result
+
+        result = Player.player_data_cache[self.uuid]
         if result is None:
-            if default is not None:
-                return default
-            return None
+            result = {}
         key = shop_function.shop.get_shop_id() + "." + shop_function.config_prefix + "." + key
         key = humps.camelize(key)
         result = flatten_dict(result, max_depth=2)
@@ -80,19 +83,17 @@ class Player(object):
             if default is not None:
                 return default
             return None
-        return result[key]
+        return result.get(key)
 
     # ======= minecraft functions ========
     def send_message(self, message):
-        def task():
-            self.main.api.http_request(self.server, "/chat/tell", "POST", {
-                "message": message,
-                "playerUuid": self.uuid
-            })
-        self.main.thread_pool.submit(task)
+        return self.main.api.http_request(self.server, "/chat/tell", "POST", {
+            "message": message,
+            "playerUuid": self.uuid
+        })
 
     def execute_command_in_server(self, command: str):
-        result = self.main.api.execute_command_in_server(self.server, command, False, self.command_queue_material)
+        result = self.main.api.execute_command_in_server(self.server, command)
         return RequestResponse(result)
 
     def item_give(self, item_base64, amount: int):
@@ -117,29 +118,21 @@ class Player(object):
     def warn_message(self, message: str):
         return self.send_message("§6[§eMan10Shop§dV3§6]§c§l" + message)
 
-    def get_player_data(self) -> dict:
-        return self.main.api.http_request(self.server, "/players/" + str(self.uuid), "GET")
-
     # economy
 
     def get_balance(self) -> float | None:
-        # command = "mshop moneyGet " + self.uuid
-        # result = self.main.api.execute_command_in_server(self.server, command)
-        # if result is None:
-        #     return None
-        # result = result.split(",")
-        # if result[0] != "success": return None
-        # return float(result[1])
-        player_data = self.get_player_data()
-        return player_data["balance"]
+        command = "mshop moneyGet " + self.uuid
+        result = self.main.api.execute_command_in_server(self.server, command)
+        result = result.split(",")
+        if result[0] != "success":
+            return None
+        return float(result[1])
 
     def give_money(self, amount: float):
-        command = "mshop moneyGive " + self.uuid + " " + str(amount)
-        return self.execute_command_in_server(command)
+        return self.execute_command_in_server("mshop moneyGive " + self.uuid + " " + str(amount))
 
     def take_money(self, amount: float):
-        command = "mshop moneyTake " + self.uuid + " " + str(amount)
-        return self.execute_command_in_server(command)
+        return self.execute_command_in_server("mshop moneyTake " + self.uuid + " " + str(amount))
 
     # uuid tools
     def get_uuid_formatted(self):
