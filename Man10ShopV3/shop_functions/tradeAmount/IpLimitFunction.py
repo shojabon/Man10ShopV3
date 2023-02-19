@@ -72,6 +72,7 @@ class IpLimitFunction(ShopFunction):
             }},
             upsert=True
         )
-        del IpLimitFunction.ip_tables_cache[order.player.ip_address]
+        if order.player.ip_address in IpLimitFunction.ip_tables_cache:
+            del IpLimitFunction.ip_tables_cache[order.player.ip_address]
 
 

@@ -51,6 +51,7 @@ class Shop(object):
     variable_permissions = {}
     variable_check = {}
     dynamic_variables = {}
+    visible_in_json = {}
 
     def __init__(self, main: Man10ShopV3API):
         self.api = main
@@ -119,8 +120,14 @@ class Shop(object):
         self.data = merge_dictionaries(self.data, humps.decamelize(data))
 
     def get_export_data(self):
-        return humps.camelize(merge_dictionaries(self.data, self.dynamic_variables))
+        result = humps.camelize(merge_dictionaries(self.data, self.dynamic_variables))
+        result = flatten_dict(result).copy()
+        for key in self.visible_in_json.keys():
+            if self.visible_in_json[key]: continue
+            key = humps.camelize(key)
+            if key in result: del result[key]
 
+        return unflatten_dict(result)
     def register_function(self, prefix: str, function: ShopFunction) -> Any:
         function.shop = self
         function.config_prefix = prefix
@@ -209,7 +216,6 @@ class Shop(object):
         return self.get_variable("admin")
 
     # queue task
-
     def accept_order(self, data):
         if "amount" not in data["data"]:
             return

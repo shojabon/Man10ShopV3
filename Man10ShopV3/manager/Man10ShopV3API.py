@@ -30,6 +30,7 @@ class Man10ShopV3API:
 
         self.base_shop_object = Shop(self)
         self.base_shop_object.api = None
+        self.threadpool = ThreadPoolExecutor(max_workers=50)
     def get_shop_id_from_location(self, sign: Sign):
         query = {"sign.signs." + str(sign.location_id()): {"$exists": True}}
         query = self.main.mongo["man10shop_v3"]["shops"].find_one(query, {"_id": 0, "shopId": 1})
@@ -118,12 +119,17 @@ class Man10ShopV3API:
             traceback.print_exc()
             return None
 
-    def execute_command_in_server(self, endpoint, command):
-        result = self.main.api.http_request(endpoint, "/server/scommand", "POST", {
-            "command": command
-        }, False)
-        print("executing command", command, "in server", endpoint, "result", result)
-        return result
+    def execute_command_in_server(self, endpoint, command, execute_async: bool = False):
+        def task():
+            result = self.main.api.http_request(endpoint, "/server/scommand", "POST", {
+                "command": command
+            }, False)
+            # print("executing command", command, "in server", endpoint, "result", result)
+            return result
+        if not execute_async:
+            return task()
+        else:
+            self.threadpool.submit(task)
 
     def update_log(self, log_id: str, data: dict):
         try:

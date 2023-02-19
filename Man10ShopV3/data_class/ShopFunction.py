@@ -22,12 +22,13 @@ class ShopFunction(object):
 
     # config functions
 
-    def set_variable(self, key, value, permission="MODERATOR", variable_check: Callable = None):
+    def set_variable(self, key, value, permission="MODERATOR", variable_check: Callable = None, visible_in_json: bool = True):
         self.shop.variable_permissions[self.config_prefix + "." + key] = permission
         if self.get(key) is None:
             self.set(key, value, variable_check=False, update_db=False)
         if variable_check is not None:
             self.shop.variable_check[self.config_prefix + "." + key] = variable_check
+        self.shop.visible_in_json[self.config_prefix + "." + key] = visible_in_json
 
     def get(self, key):
         return self.shop.get_variable(self.config_prefix + "." + key)
@@ -37,9 +38,6 @@ class ShopFunction(object):
         if not result:
             return False
         return result
-
-    def delete(self, key):
-        return self.shop.delete_variable(key)
 
     def set_dynamic_variable(self, key: str, value) -> dict:
         return self.shop.set_dynamic_variable(self.config_prefix + "." + key, value)

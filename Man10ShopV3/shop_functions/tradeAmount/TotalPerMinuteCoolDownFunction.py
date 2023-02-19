@@ -13,7 +13,8 @@ class TotalPerMinuteCoolDownFunction(ShopFunction):
     def on_function_init(self):
         self.set_variable("time", 0)
         self.set_variable("amount", 0)
-        self.set_variable("trade_log", [])
+
+        self.set_variable("trade_log", [], visible_in_json=False)
 
     def set_time(self, time: int):
         return self.set("time", time)
@@ -78,3 +79,4 @@ class TotalPerMinuteCoolDownFunction(ShopFunction):
 
     def is_function_enabled(self) -> bool:
         return self.get_time() != 0 and self.get_amount() != 0
+

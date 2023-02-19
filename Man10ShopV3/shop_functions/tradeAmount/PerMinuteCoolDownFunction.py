@@ -1,4 +1,5 @@
 import datetime
+import time
 import traceback
 from typing import Optional
 
@@ -36,12 +37,14 @@ class PerMinuteCoolDownFunction(ShopFunction):
             trade_log = player.get_data(self, "trade_log", [])
             bought_count = 0
             new_log = []
+            current_time = datetime.datetime.now().timestamp()
+            time_range = self.get_time() * 60
             for log in trade_log:
-                if log["time"].timestamp() < datetime.datetime.now().timestamp() - self.get_time() * 60:
+                if log["time"].timestamp() < current_time - time_range:
                     continue
                 bought_count += log["amount"]
                 new_log.append(log)
-
+            player.set_data(self, "trade_log", new_log)
             return bought_count
         except Exception:
             traceback.print_exc()

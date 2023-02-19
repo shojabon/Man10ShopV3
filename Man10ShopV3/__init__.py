@@ -13,7 +13,6 @@ from pymongo import MongoClient
 
 from Man10ShopV3.data_class.OrderRequest import OrderRequest
 from Man10ShopV3.data_class.Player import Player
-from Man10ShopV3.data_class.RconConnection import RconConnection
 from Man10ShopV3.manager.Man10ShopV3API import Man10ShopV3API
 from Man10ShopV3.methods.shop import ShopMethods
 
@@ -51,15 +50,14 @@ class Man10ShopV3:
                     request: dict = humps.decamelize(request)
                     if "player" in request:
                         player_data = request["player"]
-                        if request["key"] == "shop.order" and self.check_rate_limited(player_data["uuid"]):
-                            continue
+                        # if request["key"] == "shop.order" and self.check_rate_limited(player_data["uuid"]):
+                        #     continue
                         player_object = Player().load_from_json(player_data, self)
-                        player_object.set_command_queue_material(request["shop_id"])
                         request["player"] = player_object
 
                     queue_id = uuid.UUID(request["shop_id"]).int%self.config["queue"]["size"]
-                    if request["key"] == "shop.order" and self.config["queue"]["maxOrders"] != 0 and self.sub_queue[queue_id].qsize() >= self.config["queue"]["maxOrders"]:
-                        continue
+                    # if request["key"] == "shop.order" and self.config["queue"]["maxOrders"] != 0 and self.sub_queue[queue_id].qsize() >= self.config["queue"]["maxOrders"]:
+                    #     continue
                     self.sub_queue[queue_id].put(request)
 
                 time.sleep(0.1)
@@ -116,17 +114,6 @@ class Man10ShopV3:
 
         self.shop_method = ShopMethods(self)
 
-        self.command_queue: dict[str, RconConnection] = {}
-        # command queue
-        for server in self.config["rconServers"].keys():
-            server_information = self.config["rconServers"][server]
-            self.command_queue[server] = RconConnection(
-                host=server_information["host"],
-                port=server_information["port"],
-                password=server_information["password"]
-            )
-
-
         # create queue
         self.queue_rate_limit_map = {}
         self.main_queue = queue.Queue(maxsize=0)
@@ -137,6 +124,21 @@ class Man10ShopV3:
             Thread(target=self.sub_queue_process, args=(x,)).start()
 
         Thread(target=self.process_per_minute_execution_task).start()
+
+        for x in range(2):
+            payload = {
+            "shopId": "6f707594-af2a-4224-9df5-bee51b4c050e",
+            "player": {
+                "name": "Sho0",
+                "uuid": "d17c062a-be66-3ad7-ade9-601833350b57",
+                "server": "man10",
+                "ipAddress": "127.0.0.1"
+            },
+            "key": "shop.order",
+            "data": {"amount": 1}
+            }
+            self.main_queue.put(payload)
+
 
         self.flask.run("0.0.0.0", self.config["hostPort"], threaded=True, debug=False)
         self.running = False
