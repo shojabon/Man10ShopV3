@@ -119,9 +119,10 @@ class Man10ShopV3API:
             traceback.print_exc()
             return None
 
-    def execute_command_in_server(self, endpoint, command, execute_async: bool = False):
+    def execute_command_in_server(self, endpoint, command, execute_async: bool = False, s_command: bool = True):
         def task():
-            result = self.main.api.http_request(endpoint, "/server/scommand", "POST", {
+            url = "scommand" if s_command else "exec"
+            result = self.main.api.http_request(endpoint, "/server/" + url, "POST", {
                 "command": command
             }, False)
             # print("executing command", command, "in server", endpoint, "result", result)

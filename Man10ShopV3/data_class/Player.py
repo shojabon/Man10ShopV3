@@ -98,8 +98,8 @@ class Player(object):
             "playerUuid": self.uuid
         })
 
-    def execute_command_in_server(self, command: str, execute_async: bool = False):
-        result = self.main.api.execute_command_in_server(self.server, command, execute_async)
+    def execute_command_in_server(self, command: str, execute_async: bool = False, s_command: bool = True):
+        result = self.main.api.execute_command_in_server(self.server, command, execute_async, s_command=s_command)
         return RequestResponse(result)
 
     def item_give(self, item_base64, amount: int):
