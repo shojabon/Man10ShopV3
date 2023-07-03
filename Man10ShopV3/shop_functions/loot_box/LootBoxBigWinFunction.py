@@ -20,6 +20,6 @@ class LootBoxBigWinFunction(ShopFunction):
 
         group: LootBoxGroup = self.shop.loot_box_group_function.get_groups()[data["data"]["group_id"]]
         if group.big_win:
-            player.execute_command_in_server("broadcast §e§l" + player.name + "さん§a§lは" + self.shop.name_function.get_name() + "で『" + item.display_name + "』§a§lが当たりました!", s_command=True)
+            player.execute_command_in_server("broadcast §e§l" + player.name + "さん§a§lは" + self.shop.name_function.get_name() + "で『" + item.display_name + "』§a§lが当たりました!", s_command=False)
 
 
