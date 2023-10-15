@@ -262,7 +262,7 @@ class Shop(object):
             if len(function.allowed_shop_type) != 0 and self.get_shop_type() not in function.allowed_shop_type:
                 continue
             if not function.is_allowed_to_use_shop(order):
-                print("out", function)
+                print("out", self.get_shop_id(), function)
                 return False
         return True
 

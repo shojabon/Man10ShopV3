@@ -64,8 +64,13 @@ class TotalPerMinuteCoolDownFunction(ShopFunction):
 
     def after_perform_action(self, order: OrderRequest):
         trade_log = self.get_trade_log()
-        trade_log.append({"time": datetime.datetime.now(), "amount": order.amount})
-        self.set_trade_log(trade_log)
+        new_trade_log = []
+        for log in trade_log:
+            if log["time"].timestamp() < datetime.datetime.now().timestamp() - self.get_time() * 60:
+                continue
+            new_trade_log.append(log)
+        new_trade_log.append({"time": datetime.datetime.now(), "amount": order.amount})
+        self.set_trade_log(new_trade_log)
 
     def item_count(self, player: Player) -> Optional[int]:
         if player is None:
