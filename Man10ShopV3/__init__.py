@@ -100,7 +100,7 @@ class Man10ShopV3:
 
         # load config
 
-        config_file = open("config.json", encoding="utf-8")
+        config_file = open("config/config.json", encoding="utf-8")
         self.config = json.loads(config_file.read())
         config_file.close()
 
