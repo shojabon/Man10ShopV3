@@ -93,10 +93,15 @@ class Player(object):
 
     # ======= minecraft functions ========
     def send_message(self, message):
-        return self.main.api.http_request(self.server, "/chat/tell", "POST", {
-            "message": message,
-            "playerUuid": self.uuid
-        })
+        def task():
+            return self.main.api.http_request(self.server, "/chat/tell", "POST", {
+                "message": message,
+                "playerUuid": self.uuid
+            })
+
+        self.main.thread_pool.submit(task)
+
+        return True
 
     def execute_command_in_server(self, command: str, execute_async: bool = False, s_command: bool = True):
         result = self.main.api.execute_command_in_server(self.server, command, execute_async, s_command=s_command)

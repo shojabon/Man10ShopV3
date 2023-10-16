@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import datetime
 import json
+import time
 import traceback
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from copy import copy, deepcopy
+from queue import Queue
 from threading import Thread
 from typing import TYPE_CHECKING, Optional
 
@@ -31,6 +33,42 @@ class Man10ShopV3API:
         self.base_shop_object = Shop(self)
         self.base_shop_object.api = None
         self.threadpool = ThreadPoolExecutor(max_workers=50)
+
+        self.shop_variable_update_queue = Queue()
+        self.shop_variable_update_thread = Thread(target=self.shop_variable_update_thread)
+        self.shop_variable_update_thread.start()
+
+    def shop_variable_update_thread(self):
+        temp_queue = {}
+        # schema of object
+        # "shop_id": self.get_shop_id(),
+        # "key": key,
+        # "value": value
+        while True:
+            try:
+                time.sleep(self.main.config["batching"]["setVariableBatchSeconds"])
+
+                while not self.shop_variable_update_queue.empty():
+                    set_variable_request_object = self.shop_variable_update_queue.get()
+                    shop_id = set_variable_request_object["shop_id"]
+                    key = set_variable_request_object["key"]
+                    value = set_variable_request_object["value"]
+                    if shop_id not in temp_queue:
+                        temp_queue[shop_id] = {}
+                    temp_queue[shop_id][key] = value
+
+                if len(temp_queue) == 0:
+                    continue
+
+                for shop_id in list(temp_queue.keys()):
+                    temp_queue[shop_id] = humps.camelize(temp_queue[shop_id])
+                for shop_id in list(temp_queue.keys()):
+                    print("Pushed data to database: " + shop_id + " " + str(temp_queue[shop_id]))
+                    self.main.mongo["man10shop_v3"]["shops"].update_one({"shopId": shop_id}, {"$set": temp_queue[shop_id]})
+                    del temp_queue[shop_id]
+
+            except Exception:
+                traceback.print_exc()
     def get_shop_id_from_location(self, sign: Sign):
         query = {"sign.signs." + str(sign.location_id()): {"$exists": True}}
         query = self.main.mongo["man10shop_v3"]["shops"].find_one(query, {"_id": 0, "shopId": 1})

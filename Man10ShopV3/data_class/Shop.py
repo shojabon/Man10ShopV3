@@ -171,15 +171,20 @@ class Shop(object):
         data[key] = value
         self.data = unflatten_dict(data)
 
-        update_data = humps.camelize({key: value})
         if update_db:
-            print(self.get_shop_id(), update_data)
-            result = self.api.main.mongo["man10shop_v3"]["shops"].update_one({"shopId": self.get_shop_id()},
-                                                                             {"$set": update_data})
+            self.api.shop_variable_update_queue.put({
+                "shop_id": self.get_shop_id(),
+                "key": key,
+                "value": value
+            })
+
+            # update_data = humps.camelize({key: value})
+            # print("ori", update_data)
+            # print(self.get_shop_id(), update_data)
             # result = self.api.main.mongo["man10shop_v3"]["shops"].update_one({"shopId": self.get_shop_id()},
-            #                                                                  {"$set": humps.camelize(self.data)})
-            if result.raw_result["ok"] != 1:
-                return False
+            #                                                                  {"$set": update_data})
+            # if result.raw_result["ok"] != 1:
+            #     return False
             return True
         else:
             return True
