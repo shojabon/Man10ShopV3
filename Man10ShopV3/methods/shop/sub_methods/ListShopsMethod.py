@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import json
 import traceback
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
+
+from pydantic import BaseModel
 
 from Man10ShopV3.data_class.Player import Player
-from Man10ShopV3.common_variables.common_variables import player_schema
+from Man10ShopV3.common_variables.common_variables import player_schema, PlayerBaseModel
 from utils.JsonSchemaWrapper import flask_json_schema
 from utils.MatResponseWrapper import flask_mat_response_wrapper
 
@@ -12,34 +15,23 @@ if TYPE_CHECKING:
     from Man10ShopV3.methods.shop import ShopMethods
 
 
+class ListShopsRequest(BaseModel):
+    player: PlayerBaseModel
+    admin: Optional[bool] = False
+
+
 class ListShopsMethod:
 
     def __init__(self, methods: ShopMethods):
         self.methods = methods
-        self.schema = {
-            "type": "object",
-            "properties": {
-                "admin": {
-                    "type": "boolean"
-                },
-                "player": player_schema,
-            },
-            "required": ["player"]
 
-        }
-
-        self.register_endpoint()
-
-    def register_endpoint(self):
-        @self.methods.blueprint.route("list", methods=["POST"])
-        @flask_mat_response_wrapper()
-        @flask_json_schema(self.schema)
-        def shop_list(json_body: dict):
+        @self.methods.main.app.post("/shop/list")
+        async def shop_list(request: ListShopsRequest, lang: Optional[str] = "jp"):
             try:
-                player = Player().load_from_json(json_body["player"], self.methods.main)
+                player = Player().load_from_json(json.loads(request.player.json()), self.methods.main)
                 shops = self.methods.main.api.get_player_shops(player)
 
-                if "admin" in json_body and json_body["admin"]:
+                if request.admin:
                     shops = self.methods.main.api.get_admin_shops()
 
                 results = []
@@ -59,7 +51,8 @@ class ListShopsMethod:
                         "category": shop.category_function.get_category()
                     })
                 results = sorted(results, key=lambda x: x["category"] + "-" + x["name"], reverse=False)
-                return "success", results
+                return self.methods.response_object("success", results)
             except Exception as e:
                 traceback.print_exc()
-                return "error_internal", {"message": str(e)}
+                return self.methods.response_object("error_internal", {"message": str(e)})
+

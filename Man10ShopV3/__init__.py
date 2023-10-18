@@ -8,8 +8,12 @@ from datetime import datetime
 from threading import Thread
 
 import humps
+import uvicorn
+from fastapi import FastAPI, Request, status
+from fastapi.exceptions import RequestValidationError
 from flask import Flask
 from pymongo import MongoClient
+from starlette.responses import JSONResponse
 
 from Man10ShopV3.data_class.OrderRequest import OrderRequest
 from Man10ShopV3.data_class.Player import Player
@@ -92,6 +96,13 @@ class Man10ShopV3:
 
     def __init__(self):
         # variables
+        self.app = FastAPI()
+
+        @self.app.exception_handler(RequestValidationError)
+        async def handler(request: Request, exc: RequestValidationError):
+            print(exc)
+            return JSONResponse(content={}, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
         self.flask = Flask(__name__)
         self.running = True
         self.flask.url_map.strict_slashes = False
@@ -125,22 +136,27 @@ class Man10ShopV3:
 
         Thread(target=self.process_per_minute_execution_task).start()
 
-        for x in range(2):
-            payload = {
-            "shopId": "6f707594-af2a-4224-9df5-bee51b4c050e",
-            "player": {
-                "name": "Sho0",
-                "uuid": "d17c062a-be66-3ad7-ade9-601833350b57",
-                "server": "man10",
-                "ipAddress": "127.0.0.1"
-            },
-            "key": "shop.order",
-            "data": {"amount": 1}
-            }
-            self.main_queue.put(payload)
+        # for x in range(2):
+        #     payload = {
+        #     "shopId": "6f707594-af2a-4224-9df5-bee51b4c050e",
+        #     "player": {
+        #         "name": "Sho0",
+        #         "uuid": "d17c062a-be66-3ad7-ade9-601833350b57",
+        #         "server": "man10",
+        #         "ipAddress": "127.0.0.1"
+        #     },
+        #     "key": "shop.order",
+        #     "data": {"amount": 1}
+        #     }
+        #     self.main_queue.put(payload)
 
 
-        self.flask.run("0.0.0.0", self.config["hostPort"], threaded=True, debug=False)
+        # self.flask.run("0.0.0.0", self.config["hostPort"], threaded=True, debug=False)
+        uvicorn.run(
+            self.app,
+            port=self.config["hostPort"],
+            host="0.0.0.0"
+        )
         self.running = False
         self.main_queue.put("CLOSE")
         for x in range(self.config["queue"]["size"]):

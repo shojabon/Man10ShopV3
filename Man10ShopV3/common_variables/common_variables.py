@@ -1,3 +1,6 @@
+from typing import Optional
+
+from pydantic import BaseModel, constr
 
 player_schema = {
     "type": "object",
@@ -45,3 +48,19 @@ location_schema = {
     },
     "required": ["server", "world", "x", "y", "z"]
 }
+
+
+class PlayerBaseModel(BaseModel):
+    name: str
+    uuid: constr(regex="^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", max_length=36, min_length=36)
+    balance: Optional[int]
+    server: Optional[str]
+    inventory: Optional[dict]
+
+
+class LocationBaseModel(BaseModel):
+    server: str
+    world: str
+    x: int
+    y: int
+    z: int
