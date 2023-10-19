@@ -53,9 +53,9 @@ location_schema = {
 class PlayerBaseModel(BaseModel):
     name: str
     uuid: str
-    balance: Optional[int]
-    server: Optional[str]
-    inventory: Optional[dict]
+    balance: Optional[int] = None
+    server: Optional[str] = None
+    inventory: Optional[dict] = None
 
 
 class LocationBaseModel(BaseModel):
