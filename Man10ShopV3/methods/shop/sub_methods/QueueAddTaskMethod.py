@@ -28,6 +28,7 @@ class QueueAddTaskMethod:
         async def queue_add(request: QueueAddTaskRequest):
             try:
                 request_data = request.dict()
+                print(request_data)
                 request_data["registered_time"] = datetime.datetime.now()
                 # self.methods.main.mongo["man10shop_v3"]["queue"].insert_one(humps.camelize(request_data))
                 self.methods.main.main_queue.put(humps.camelize(request_data))

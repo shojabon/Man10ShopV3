@@ -56,6 +56,7 @@ class PlayerBaseModel(BaseModel):
     balance: Optional[int] = None
     server: Optional[str] = None
     inventory: Optional[dict] = None
+    ipAddress: Optional[str] = None
 
 
 class LocationBaseModel(BaseModel):
