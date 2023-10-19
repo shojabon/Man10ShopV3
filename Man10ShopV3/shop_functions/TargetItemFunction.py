@@ -12,7 +12,6 @@ if TYPE_CHECKING:
 
 class TargetItemFunction(ShopFunction):
     allowed_shop_type = ["BUY", "SELL"]
-
     # variables
 
     def on_function_init(self):

@@ -22,7 +22,6 @@ from Man10ShopV3.methods.shop import ShopMethods
 
 
 class Man10ShopV3:
-
     def sub_queue_process(self, queue_id: int):
         queue_object = self.sub_queue[queue_id]
         while self.running:
@@ -135,21 +134,6 @@ class Man10ShopV3:
             Thread(target=self.sub_queue_process, args=(x,)).start()
 
         Thread(target=self.process_per_minute_execution_task).start()
-
-        # for x in range(2):
-        #     payload = {
-        #     "shopId": "6f707594-af2a-4224-9df5-bee51b4c050e",
-        #     "player": {
-        #         "name": "Sho0",
-        #         "uuid": "d17c062a-be66-3ad7-ade9-601833350b57",
-        #         "server": "man10",
-        #         "ipAddress": "127.0.0.1"
-        #     },
-        #     "key": "shop.order",
-        #     "data": {"amount": 1}
-        #     }
-        #     self.main_queue.put(payload)
-
 
         # self.flask.run("0.0.0.0", self.config["hostPort"], threaded=True, debug=False)
         uvicorn.run(
