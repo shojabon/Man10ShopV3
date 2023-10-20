@@ -38,7 +38,7 @@ class SetVariable:
                 shop = self.methods.main.api.get_shop(request.shopId)
                 player = None
                 if shop is None:
-                    return "shop_invalid"
+                    return self.methods.response_object("shop_invalid")
 
                 request.key = humps.decamelize(request.key)
 
@@ -50,9 +50,9 @@ class SetVariable:
                     required_permission = shop.variable_permissions[request.key]
 
                 if not shop.is_admin() and not shop.permission_function.has_permission_at_least(required_permission, owning_permission):
-                    return "permission_insufficient"
+                    return self.methods.response_object("permission_insufficient")
                 if not shop.set_variable(request.key, request.value, True, player=player):
-                    return "error_internal"
+                    return self.methods.response_object("error_internal")
 
                 def update_signs():
                     shop.sign_function.update_signs()

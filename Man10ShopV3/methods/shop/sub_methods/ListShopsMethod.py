@@ -40,6 +40,8 @@ class ListShopsMethod:
                     if shop.delete_function.is_deleted(): continue
                     if permission is None:
                         permission = "ERROR"
+                    if permission == "ALLOWED_TO_USE" or permission == "IS_BANNED":
+                        continue
                     results.append({
                         "shopId": shop.get_shop_id(),
                         "name": shop.name_function.get_name(),

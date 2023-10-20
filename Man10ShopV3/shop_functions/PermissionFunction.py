@@ -43,6 +43,8 @@ class PermissionFunction(ShopFunction):
         if permission == "MODERATOR": permission_level = 9
         if permission == "ACCOUNTANT": permission_level = 7
         if permission == "STORAGE_ACCESS": permission_level = 6
+        if permission == "ALLOWED_TO_USE": permission_level = 0
+        if permission == "BANNED": permission_level = -1
         return permission_level
 
     def has_permission_at_least(self, target_permission: str, owning_permission: str):
@@ -50,3 +52,9 @@ class PermissionFunction(ShopFunction):
 
     def has_permission(self, player: Player, permission: str):
         return self.has_permission_at_least(permission, self.get_permission(player))
+
+    def is_allowed_to_use_shop(self, order: OrderRequest) -> bool:
+        if not self.has_permission_at_least("ALLOWED_TO_USE", self.get_permission(order.player)):
+            order.player.warn_message("このショップを使用することができません")
+            return False
+        return True
