@@ -35,7 +35,6 @@ class SetVariable:
         async def variable_set(request: SetVariableRequest, lang: Optional[str] = "jp"):
             try:
                 if type(request.value) is dict:
-                    print("request type was dict")
                     request.value = humps.decamelize(request.value)
                 if request.player is not None:
                     request.player = humps.decamelize(request.player.dict())
@@ -49,8 +48,7 @@ class SetVariable:
 
                 request.key = humps.decamelize(request.key)
 
-                print(request.key, request.value)
-                print(type(request.key), type(request.value))
+                print("setVariable", request.player, request.key, request.value, type(request.value))
 
                 if request.player:
                     player = Player().load_from_json(request.player, self.methods.main)
