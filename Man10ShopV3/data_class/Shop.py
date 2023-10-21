@@ -12,6 +12,7 @@ from Man10ShopV3.shop_functions.MoneyFunction import MoneyFunction
 from Man10ShopV3.shop_functions.agent.MoneyRefillFunction import MoneyRefillFunction
 from Man10ShopV3.shop_functions.allowed_to_use.DisabledFromFunction import DisabledFromFunction
 from Man10ShopV3.shop_functions.allowed_to_use.EnabledFromFunction import EnabledFromFunction
+from Man10ShopV3.shop_functions.allowed_to_use.MemberShopModeFunction import MemberShopModeFunction
 from Man10ShopV3.shop_functions.barter.SetBarterFunction import SetBarterFunction
 from Man10ShopV3.shop_functions.general.RandomPriceFunction import RandomPriceFunction
 from Man10ShopV3.shop_functions.general.SecretPriceModeFunction import SecretPriceModeFunction
@@ -67,9 +68,9 @@ class Shop(object):
         self.permission_function: PermissionFunction = self.register_function("permission", PermissionFunction())
 
         # allowed to use
-        self.disabled_from_function: DisabledFromFunction = self.register_function("disabled_from",
-                                                                                   DisabledFromFunction())
+        self.disabled_from_function: DisabledFromFunction = self.register_function("disabled_from", DisabledFromFunction())
         self.enabled_from_function: EnabledFromFunction = self.register_function("enabled_from", EnabledFromFunction())
+        self.member_shop_mode_function: EnabledFromFunction = self.register_function("member_shop_mode", MemberShopModeFunction())
         self.limit_use_function: LimitUseFunction = self.register_function("limit_use", LimitUseFunction())
         self.weekday_toggle: WeekDayToggleFunction = self.register_function("weekday_toggle", WeekDayToggleFunction())
 
