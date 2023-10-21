@@ -27,7 +27,8 @@ class QueueAddTaskMethod:
         @self.methods.main.app.post("/shop/queue/add")
         async def queue_add(request: QueueAddTaskRequest):
             try:
-                request.player = humps.decamelize(request.player.dict())
+                if request.player is not None:
+                    request.player = humps.decamelize(request.player.dict())
                 request.data = humps.decamelize(request.data)
                 request_data = request.dict()
                 request_data["registered_time"] = datetime.datetime.now()

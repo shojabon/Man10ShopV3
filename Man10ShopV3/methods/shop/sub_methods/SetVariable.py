@@ -34,7 +34,9 @@ class SetVariable:
         @self.methods.main.app.post("/shop/variable/set")
         async def variable_set(request: SetVariableRequest, lang: Optional[str] = "jp"):
             try:
-                request.value = humps.decamelize(request.value)
+                if type(request.value) is dict:
+                    print("request type was dict")
+                    request.value = humps.decamelize(request.value)
                 if request.player is not None:
                     request.player = humps.decamelize(request.player.dict())
 
@@ -46,6 +48,9 @@ class SetVariable:
                     return self.methods.response_object("shop_invalid")
 
                 request.key = humps.decamelize(request.key)
+
+                print(request.key, request.value)
+                print(type(request.key), type(request.value))
 
                 if request.player:
                     player = Player().load_from_json(request.player, self.methods.main)

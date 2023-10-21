@@ -51,7 +51,7 @@ class Man10ShopV3:
                     if request == "END":
                         return
                     request: dict = humps.decamelize(request)
-                    if "player" in request:
+                    if "player" in request and request["player"] is not None:
                         player_data = request["player"]
                         # if request["key"] == "shop.order" and self.check_rate_limited(player_data["uuid"]):
                         #     continue
