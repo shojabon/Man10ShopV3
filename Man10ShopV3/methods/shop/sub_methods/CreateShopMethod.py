@@ -4,6 +4,8 @@ import json
 import traceback
 from typing import TYPE_CHECKING, Optional
 
+import humps
+
 from Man10ShopV3.data_class.Player import Player
 from Man10ShopV3.data_class.Shop import Shop
 from Man10ShopV3.common_variables.common_variables import player_schema, location_schema, PlayerBaseModel
@@ -30,6 +32,8 @@ class CreateShopMethod:
         @self.methods.main.app.post("/shop/create")
         async def create_shop(request: CreateShopRequest, lang: Optional[str] = "jp"):
             try:
+                request.player = humps.decamelize(request.player.dict())
+
                 if request.admin:
                     if not self.methods.main.api.create_shop(None, "BUY", request.name, True):
                         return self.methods.response_object("error_internal")
@@ -37,7 +41,7 @@ class CreateShopMethod:
 
                 player = None
                 if request.player:
-                    player = Player().load_from_json(json.loads(request.player.json()), self.methods.main)
+                    player = Player().load_from_json(request.player, self.methods.main)
 
                 if not self.methods.main.api.create_shop(player, "BUY", request.name, False):
                     return self.methods.response_object("error_internal")

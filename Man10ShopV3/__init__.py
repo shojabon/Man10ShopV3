@@ -97,11 +97,6 @@ class Man10ShopV3:
         # variables
         self.app = FastAPI()
 
-        @self.app.exception_handler(RequestValidationError)
-        async def handler(request: Request, exc: RequestValidationError):
-            print(exc)
-            return JSONResponse(content={}, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
-
         self.flask = Flask(__name__)
         self.running = True
         self.flask.url_map.strict_slashes = False

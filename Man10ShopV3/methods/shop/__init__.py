@@ -6,7 +6,9 @@ import os
 from typing import TYPE_CHECKING
 
 import humps
-from flask import Blueprint
+from fastapi.exceptions import RequestValidationError
+from flask import Blueprint, Request
+from starlette import status
 from starlette.responses import JSONResponse
 
 from Man10ShopV3.methods.shop.sub_methods.CreateShopMethod import CreateShopMethod
@@ -33,6 +35,13 @@ class ShopMethods:
 
         self.main = main
         self.blueprint = Blueprint('shop', __name__, url_prefix="/shop")
+
+
+        @self.main.app.exception_handler(RequestValidationError)
+        async def handler(request: Request, exc: RequestValidationError):
+            print(exc)
+            return JSONResponse(content={}, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
         ListShopsMethod(self)
         ShopInformationMethod(self)
         SetVariable(self)

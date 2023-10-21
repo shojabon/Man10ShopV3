@@ -4,6 +4,7 @@ import json
 import traceback
 from typing import TYPE_CHECKING, Optional
 
+import humps
 from pydantic import BaseModel
 
 from Man10ShopV3.data_class.Player import Player
@@ -28,7 +29,10 @@ class ListShopsMethod:
         @self.methods.main.app.post("/shop/list")
         async def shop_list(request: ListShopsRequest, lang: Optional[str] = "jp"):
             try:
-                player = Player().load_from_json(json.loads(request.player.json()), self.methods.main)
+
+                request.player = humps.decamelize(request.player.dict())
+
+                player = Player().load_from_json(request.player, self.methods.main)
                 shops = self.methods.main.api.get_player_shops(player)
 
                 if request.admin:

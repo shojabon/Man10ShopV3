@@ -5,6 +5,7 @@ import traceback
 import json
 from typing import TYPE_CHECKING, Optional
 
+import humps
 from pydantic import BaseModel
 
 from Man10ShopV3.data_class.Player import Player
@@ -30,10 +31,15 @@ class ShopInformationMethod:
         @self.methods.main.app.post("/shop/info")
         async def shop_information(request: ShopInformationRequest, lang: Optional[str] = "jp"):
             try:
+                if request.player is not None:
+                    request.player = humps.decamelize(request.player.dict())
+                if request.sign is not None:
+                    request.sign = humps.decamelize(request.sign.dict())
+
                 shop_id = request.shopId
                 if request.sign:
                     sign = Sign()
-                    sign.from_json(json.loads(request.sign.json()))
+                    sign.from_json(request.sign)
                     shop_id = self.methods.main.api.get_shop_id_from_location(sign)
 
                 if shop_id is None:
@@ -47,7 +53,7 @@ class ShopInformationMethod:
                 player = None
 
                 if request.player:
-                    player = Player().load_from_json(json.loads(request.player.json()), self.methods.main)
+                    player = Player().load_from_json(request.player, self.methods.main)
                     result["playerPermission"] = shop.permission_function.get_permission(player)
 
                 menu_info = shop.get_menu_info(player)

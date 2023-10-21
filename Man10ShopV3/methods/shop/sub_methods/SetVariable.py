@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Optional, Any
 import humps
 from pydantic import BaseModel
 
+from Man10ShopV3.data_class.ItemStack import ItemStack
 from Man10ShopV3.data_class.Player import Player
 from Man10ShopV3.data_class.Shop import Shop
 from Man10ShopV3.common_variables.common_variables import player_schema, PlayerBaseModel
@@ -33,6 +34,10 @@ class SetVariable:
         @self.methods.main.app.post("/shop/variable/set")
         async def variable_set(request: SetVariableRequest, lang: Optional[str] = "jp"):
             try:
+                request.value = humps.decamelize(request.value)
+                if request.player is not None:
+                    request.player = humps.decamelize(request.player.dict())
+
                 owning_permission = "OWNER"
                 required_permission = "MODERATOR"
                 shop = self.methods.main.api.get_shop(request.shopId)
@@ -43,7 +48,7 @@ class SetVariable:
                 request.key = humps.decamelize(request.key)
 
                 if request.player:
-                    player = Player().load_from_json(json.loads(request.player.json()), self.methods.main)
+                    player = Player().load_from_json(request.player, self.methods.main)
                     owning_permission = shop.permission_function.get_permission(player)
 
                 if request.key in shop.variable_permissions:
