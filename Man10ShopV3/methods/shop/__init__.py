@@ -17,6 +17,7 @@ from Man10ShopV3.methods.shop.sub_methods.QueueAddTaskMethod import QueueAddTask
 from Man10ShopV3.methods.shop.sub_methods.SetVariable import SetVariable
 from Man10ShopV3.methods.shop.sub_methods.ShopInformationMethod import ShopInformationMethod
 from Man10ShopV3.methods.shop.sub_methods.ListShopsMethod import ListShopsMethod
+from Man10ShopV3.methods.shop.sub_methods.WithdrawBuyShopMoneyMethod import WithdrawBuyShopMoneyMethod
 
 if TYPE_CHECKING:
     from Man10ShopV3 import Man10ShopV3
@@ -48,6 +49,7 @@ class ShopMethods:
         CreateShopMethod(self)
         GetAllShopIdsMethod(self)
         QueueAddTaskMethod(self)
+        WithdrawBuyShopMoneyMethod(self)
 
         self.main.flask.register_blueprint(self.blueprint)
 
