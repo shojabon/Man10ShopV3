@@ -19,6 +19,7 @@ from Man10ShopV3.shop_functions.general.SecretPriceModeFunction import SecretPri
 from Man10ShopV3.shop_functions.loot_box.LootBoxBigWinFunction import LootBoxBigWinFunction
 from Man10ShopV3.shop_functions.loot_box.LootBoxGroupFunction import LootBoxGroupFunction
 from Man10ShopV3.shop_functions.loot_box.LootBoxPaymentFunction import LootBoxPaymentFunction
+from Man10ShopV3.shop_functions.storage.PerPlayerStorageRefillFunction import PerPlayerStorageRefillFunction
 from Man10ShopV3.shop_functions.tradeAmount.IpLimitFunction import IpLimitFunction
 from Man10ShopV3.shop_functions.tradeAmount.LimitUseFunction import LimitUseFunction
 from Man10ShopV3.shop_functions.allowed_to_use.WeekDayToggleFunction import WeekDayToggleFunction
@@ -78,6 +79,8 @@ class Shop(object):
         self.storage_cap_function: StorageCapFunction = self.register_function("storage_cap", StorageCapFunction())
         self.storage_refill_function: StorageRefillFunction = self.register_function("storage_refill",
                                                                                      StorageRefillFunction())
+        self.per_player_storage_refill_function: PerPlayerStorageRefillFunction = self.register_function(
+            "per_player_storage_refill", PerPlayerStorageRefillFunction())
 
         # trade amount
         self.cool_down_function: CoolDownFunction = self.register_function("cool_down", CoolDownFunction())

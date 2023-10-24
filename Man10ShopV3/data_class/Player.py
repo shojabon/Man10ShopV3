@@ -75,6 +75,7 @@ class Player(object):
         if self.uuid not in Player.player_data_cache:
             result = self.main.mongo["man10shop_v3"]["player_data"].find_one({"uuid": self.uuid})
             if result is None:
+                result = {}
                 if default is not None:
                     self.set_data(shop_function, key, default)
             result = flatten_dict(result, max_depth=2)
