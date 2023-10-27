@@ -9,6 +9,7 @@ import humps
 from Man10ShopV3.data_class.Player import Player
 from Man10ShopV3.data_class.ShopFunction import ShopFunction
 from Man10ShopV3.shop_functions.MoneyFunction import MoneyFunction
+from Man10ShopV3.shop_functions.agent.ItemRefillFunction import ItemRefillFunction
 from Man10ShopV3.shop_functions.agent.MoneyRefillFunction import MoneyRefillFunction
 from Man10ShopV3.shop_functions.allowed_to_use.DisabledFromFunction import DisabledFromFunction
 from Man10ShopV3.shop_functions.allowed_to_use.EnabledFromFunction import EnabledFromFunction
@@ -116,6 +117,7 @@ class Shop(object):
 
         # agent
         self.money_refill_function: MoneyRefillFunction = self.register_function("money_refill", MoneyRefillFunction())
+        self.item_refill_function: ItemRefillFunction = self.register_function("item_refill", ItemRefillFunction())
 
 
         self.register_queue_callback("shop.order", self.accept_order)

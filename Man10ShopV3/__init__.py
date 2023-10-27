@@ -58,7 +58,7 @@ class Man10ShopV3:
                         player_object = Player().load_from_json(player_data, self)
                         request["player"] = player_object
 
-                    queue_id = uuid.UUID(request["shop_id"]).int%self.config["queue"]["size"]
+                    queue_id = uuid.UUID(request["shop_id"]).int % self.config["queue"]["size"]
                     # if request["key"] == "shop.order" and self.config["queue"]["maxOrders"] != 0 and self.sub_queue[queue_id].qsize() >= self.config["queue"]["maxOrders"]:
                     #     continue
                     self.sub_queue[queue_id].put(request)
@@ -80,6 +80,7 @@ class Man10ShopV3:
                 return True
         self.queue_rate_limit_map[player_uuid] = current_time
         return False
+
     def process_per_minute_execution_task(self):
         timer = 0
         while self.running:
@@ -140,4 +141,3 @@ class Man10ShopV3:
         self.main_queue.put("CLOSE")
         for x in range(self.config["queue"]["size"]):
             self.sub_queue[x].put("CLOSE")
-
