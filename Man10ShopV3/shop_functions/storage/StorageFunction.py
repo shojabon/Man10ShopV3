@@ -145,7 +145,9 @@ class StorageFunction(ShopFunction):
         if self.shop.get_shop_type() == "BUY":
             return self.get_item_count()
         if self.shop.get_shop_type() == "SELL":
-            return self.get_storage_size() - self.get_item_count()
+            storage_size = self.get_storage_size() - self.get_item_count()
+            if storage_size < 0: storage_size = 0
+            return storage_size
         return self.get_storage_size()
 
     def is_allowed_to_use_shop(self, order: OrderRequest) -> bool:

@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from Man10ShopV3.data_class.ShopFunction import ShopFunction
     from Man10ShopV3 import Man10ShopV3
 
+
 class Player(object):
     main: Man10ShopV3 = None
 
@@ -54,24 +55,31 @@ class Player(object):
             current_data = Player.player_data_cache[self.uuid]
             current_data[humps.camelize(key)] = data
 
-        def task():
-            if data is None:
-                self.main.mongo["man10shop_v3"]["player_data"].update_one({
-                    "uuid": self.uuid
-                }, {humps.camelize(key): {"$unset": True}})
-                return True
-            else:
-                result = self.main.mongo["man10shop_v3"]["player_data"].update_one({
-                    "uuid": self.uuid,
-                }, {"$set": {humps.camelize(key): data}}, upsert=True)
-                if result.raw_result["ok"] != 1:
-                    return False
-                return True
+        task = {
+            "uuid": self.uuid,
+            "key": key,
+            "data": data
+        }
 
-        self.main.thread_pool.submit(task)
+        self.main.api.player_data_update_queue.put(task)
 
+        # def task():
+        #     if data is None:
+        #         self.main.mongo["man10shop_v3"]["player_data"].update_one({
+        #             "uuid": self.uuid
+        #         }, {humps.camelize(key): {"$unset": True}})
+        #         return True
+        #     else:
+        #         result = self.main.mongo["man10shop_v3"]["player_data"].update_one({
+        #             "uuid": self.uuid,
+        #         }, {"$set": {humps.camelize(key): data}}, upsert=True)
+        #         if result.raw_result["ok"] != 1:
+        #             return False
+        #         return True
+        #
+        # self.main.thread_pool.submit(task)
 
-    def get_data(self, shop_function: ShopFunction, key: str, default = None):
+    def get_data(self, shop_function: ShopFunction, key: str, default=None):
         if self.uuid not in Player.player_data_cache:
             result = self.main.mongo["man10shop_v3"]["player_data"].find_one({"uuid": self.uuid})
             if result is None:

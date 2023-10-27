@@ -38,6 +38,10 @@ class Man10ShopV3API:
         self.shop_variable_update_thread = Thread(target=self.shop_variable_update_thread)
         self.shop_variable_update_thread.start()
 
+        self.player_data_update_queue = Queue()
+        self.player_data_update_thread = Thread(target=self.player_data_update_thread)
+        self.player_data_update_thread.start()
+
     def shop_variable_update_thread(self):
         temp_queue = {}
         # schema of object
@@ -66,6 +70,48 @@ class Man10ShopV3API:
                     print("Pushed data to database: " + shop_id + " " + str(temp_queue[shop_id]))
                     self.main.mongo["man10shop_v3"]["shops"].update_one({"shopId": shop_id}, {"$set": temp_queue[shop_id]})
                     del temp_queue[shop_id]
+
+            except Exception:
+                traceback.print_exc()
+
+    def player_data_update_thread(self):
+        temp_queue = {}
+        # schema of object
+        # "uuid": uuid,
+        # "key": key,
+        # "data": data
+        while True:
+            try:
+                time.sleep(self.main.config["batching"]["setVariableBatchSeconds"])
+
+                while not self.player_data_update_queue.empty():
+                    set_variable_request_object = self.player_data_update_queue.get()
+                    player_uuid = set_variable_request_object["uuid"]
+                    key = set_variable_request_object["key"]
+                    key = humps.camelize(key)
+                    data = set_variable_request_object["data"]
+                    if player_uuid not in temp_queue:
+                        temp_queue[player_uuid] = {}
+                    temp_queue[player_uuid][key] = data
+
+                if len(temp_queue) == 0:
+                    continue
+
+                for player_uuid in list(temp_queue.keys()):
+                    temp_queue[player_uuid] = humps.camelize(temp_queue[player_uuid])
+                for player_uuid in list(temp_queue.keys()):
+                    print("Pushed player data to database: " + player_uuid + " " + str(temp_queue[player_uuid]))
+                    data = temp_queue[player_uuid]
+
+                    # non data
+                    for key in list(data.keys()):
+                        if data[key] is None:
+                            data[key] = {"$unset": True}
+
+                    self.main.mongo["man10shop_v3"]["player_data"].update_one({
+                        "uuid": player_uuid,
+                    }, {"$set": data}, upsert=True)
+                    del temp_queue[player_uuid]
 
             except Exception:
                 traceback.print_exc()
