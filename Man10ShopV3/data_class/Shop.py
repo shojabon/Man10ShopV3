@@ -209,7 +209,7 @@ class Shop(object):
     def get_shop_type_string(self):
         shop_type = self.get_shop_type()
         if shop_type == "SELL":
-            return "買取りショップ"
+            return "買取ショップ"
         if shop_type == "BUY":
             return "販売ショップ"
         if shop_type == "BARTER":

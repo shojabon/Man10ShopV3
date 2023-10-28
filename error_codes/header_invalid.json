@@ -1,0 +1,7 @@
+{
+    "code": 422,
+    "message": {
+        "jp": "ヘッダーが不当です",
+        "en": "Invalid header."
+    }
+}

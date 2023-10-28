@@ -11,6 +11,7 @@ from flask import Blueprint, Request
 from starlette import status
 from starlette.responses import JSONResponse
 
+from Man10ShopV3.methods.shop.public_methods.PublicListShopsMethod import PublicListShopsMethod
 from Man10ShopV3.methods.shop.sub_methods.CreateShopMethod import CreateShopMethod
 from Man10ShopV3.methods.shop.sub_methods.GetAllShopIdsMethod import GetAllShopIdsMethod
 from Man10ShopV3.methods.shop.sub_methods.QueueAddTaskMethod import QueueAddTaskMethod
@@ -50,6 +51,7 @@ class ShopMethods:
         GetAllShopIdsMethod(self)
         QueueAddTaskMethod(self)
         WithdrawBuyShopMoneyMethod(self)
+        PublicListShopsMethod(self)
 
         self.main.flask.register_blueprint(self.blueprint)
 
