@@ -15,7 +15,7 @@ class PublicListShopsMethod:
     def __init__(self, methods: ShopMethods):
         self.methods = methods
 
-        @self.methods.main.app.post("/public/shop/list")
+        @self.methods.main.app.get("/public/shop/list")
         async def shop_list(request: Request):
             try:
                 user_id_header = request.headers.get("x-user-id")
