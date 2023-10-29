@@ -239,4 +239,13 @@ class Man10ShopV3API:
             self.shops[copy_shop.get_shop_id()] = copy_shop
         print("all shops loaded in ", datetime.datetime.now().timestamp() - start)
 
+    def create_system_log(self, log_type: str, data: dict):
+        try:
+            data["logType"] = log_type
+            data["datetime"] = datetime.datetime.now()
+            self.main.mongo["man10shop_v3"]["system_log"].insert_one(data)
+            return True
+        except Exception:
+            traceback.print_exc()
+            return False
 

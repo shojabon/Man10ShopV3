@@ -62,6 +62,7 @@ class SetVariable:
                 if not shop.set_variable(request.key, request.value, True, player=player):
                     return self.methods.response_object("error_internal")
 
+                self.methods.main.api.create_system_log("set_variable", {"shop_id": shop.get_shop_id(), "key": request.key, "value": request.value, "player": player.get_json() if player is not None else None})
                 def update_signs():
                     shop.sign_function.update_signs()
 

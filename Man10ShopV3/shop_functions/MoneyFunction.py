@@ -44,6 +44,14 @@ class MoneyFunction(ShopFunction):
         result = self.add_money(data["data"]["amount"])
         if result and player_mode:
             player.success_message("入金に成功しました")
+
+            self.shop.api.create_system_log("money.deposit", {
+                "shop_id": self.shop.get_shop_id(),
+                "amount": data["data"]["amount"],
+                "old_balance": self.get_money() - data["data"]["amount"],
+                "new_balance": self.get_money(),
+                "player": player.get_json()
+            })
         else:
             player.warn_message("入金に失敗しました")
 
@@ -65,6 +73,14 @@ class MoneyFunction(ShopFunction):
             result = player.give_money(data["data"]["amount"])
             if result and player_mode:
                 player.success_message("出金に成功しました")
+
+                self.shop.api.create_system_log("money.withdraw", {
+                    "shop_id": self.shop.get_shop_id(),
+                    "amount": data["data"]["amount"],
+                    "old_balance": self.get_money() + data["data"]["amount"],
+                    "new_balance": self.get_money(),
+                    "player": player.get_json()
+                })
             else:
                 player.warn_message("出金に失敗しました")
 
