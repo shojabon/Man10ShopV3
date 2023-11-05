@@ -188,10 +188,10 @@ class Man10ShopV3API:
             print("req endpoint", self.main.config["api"]["endpoint"].replace("{endpoint}", endpoint) + path)
             if method == "GET":
                 req = requests.get(self.main.config["api"]["endpoint"].replace("{endpoint}", endpoint) + path,
-                                   data=payload, headers={"Authenticate": self.main.config["api"]["key"]}, verify=False)
+                                   data=payload, headers={"Authorization": "Bearer " + self.main.config["api"]["key"]}, verify=False)
             if method == "POST":
                 req = requests.post(self.main.config["api"]["endpoint"].replace("{endpoint}", endpoint) + path,
-                                    data=payload, headers={"Authenticate": self.main.config["api"]["key"]}, verify=False)
+                                    data=payload, headers={"Authorization": "Bearer " + self.main.config["api"]["key"]}, verify=False)
 
             if req.status_code != 200:
                 return None
