@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 class ListShopsRequest(BaseModel):
     player: PlayerBaseModel
     admin: Optional[bool] = False
+    searchQuery: Optional[str] = None
 
 
 class ListShopsMethod:
@@ -46,6 +47,9 @@ class ListShopsMethod:
                         permission = "ERROR"
                     if permission == "ALLOWED_TO_USE" or permission == "IS_BANNED":
                         continue
+                    if request.searchQuery is not None:
+                        if request.searchQuery not in shop.name_function.get_name() and request.searchQuery not in shop.category_function.get_category():
+                            continue
                     results.append({
                         "shopId": shop.get_shop_id(),
                         "name": shop.name_function.get_name(),
