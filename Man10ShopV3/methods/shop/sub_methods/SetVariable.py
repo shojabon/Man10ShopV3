@@ -24,6 +24,7 @@ class SetVariableRequest(BaseModel):
     key: str
     shopId: str
     value: Any
+    dataOfPlayer: Optional[str] = None
 
 
 class SetVariable:
@@ -59,6 +60,19 @@ class SetVariable:
 
                 if not shop.is_admin() and not shop.permission_function.has_permission_at_least(required_permission, owning_permission):
                     return self.methods.response_object("permission_insufficient")
+                if request.dataOfPlayer is not None:
+                    target_player = Player()
+                    target_player.uuid = request.dataOfPlayer
+                    target_player.main = self.methods.main
+                    target_player.raw_set_data(request.shopId + "." + request.key, request.value)
+                    self.methods.main.api.create_system_log("set_player_variable",
+                                                            {"shop_id": shop.get_shop_id(), "key": request.key,
+                                                             "value": request.value,
+                                                             "data_of_player": target_player.uuid,
+                                                             "player": player.get_json() if player is not None else None})
+
+                    return self.methods.response_object("success")
+
                 if not shop.set_variable(request.key, request.value, True, player=player):
                     return self.methods.response_object("error_internal")
 

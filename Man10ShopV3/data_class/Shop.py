@@ -37,6 +37,7 @@ from Man10ShopV3.shop_functions.general.CategoryFunction import CategoryFunction
 from Man10ShopV3.shop_functions.storage.StorageRefillFunction import StorageRefillFunction
 from Man10ShopV3.shop_functions.tradeAmount.CoolDownFunction import CoolDownFunction
 from Man10ShopV3.shop_functions.tradeAmount.PerMinuteCoolDownFunction import PerMinuteCoolDownFunction
+from Man10ShopV3.shop_functions.tradeAmount.PerPlayerLimitUseFunction import PerPlayerLimitUseFunction
 from Man10ShopV3.shop_functions.tradeAmount.SingleTransactionModeFunction import SingleTransactionModeFunction
 from Man10ShopV3.shop_functions.tradeAmount.TotalPerMinuteCoolDownFunction import TotalPerMinuteCoolDownFunction
 from utils.JsonSchemaWrapper import merge_dictionaries
@@ -73,7 +74,6 @@ class Shop(object):
         self.disabled_from_function: DisabledFromFunction = self.register_function("disabled_from", DisabledFromFunction())
         self.enabled_from_function: EnabledFromFunction = self.register_function("enabled_from", EnabledFromFunction())
         self.member_shop_mode_function: EnabledFromFunction = self.register_function("member_shop_mode", MemberShopModeFunction())
-        self.limit_use_function: LimitUseFunction = self.register_function("limit_use", LimitUseFunction())
         self.weekday_toggle: WeekDayToggleFunction = self.register_function("weekday_toggle", WeekDayToggleFunction())
 
         # storage
@@ -94,6 +94,8 @@ class Shop(object):
 
         self.ip_limit_function: IpLimitFunction = self.register_function(
             "ip_limit", IpLimitFunction())
+        self.limit_use_function: LimitUseFunction = self.register_function("limit_use", LimitUseFunction())
+        self.per_player_limit_use_function: PerPlayerLimitUseFunction = self.register_function("per_player_limit_use", PerPlayerLimitUseFunction())
 
         # general
 

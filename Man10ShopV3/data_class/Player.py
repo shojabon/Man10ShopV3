@@ -51,6 +51,9 @@ class Player(object):
     # ======= data store =========
     def set_data(self, shop_function: ShopFunction, key: str, data):
         key = shop_function.shop.get_shop_id() + "." + shop_function.config_prefix + "." + key
+        self.raw_set_data(key, data)
+
+    def raw_set_data(self, key: str, data):
         if self.uuid in Player.player_data_cache:
             current_data = Player.player_data_cache[self.uuid]
             current_data[humps.camelize(key)] = data
@@ -62,22 +65,6 @@ class Player(object):
         }
 
         self.main.api.player_data_update_queue.put(task)
-
-        # def task():
-        #     if data is None:
-        #         self.main.mongo["man10shop_v3"]["player_data"].update_one({
-        #             "uuid": self.uuid
-        #         }, {humps.camelize(key): {"$unset": True}})
-        #         return True
-        #     else:
-        #         result = self.main.mongo["man10shop_v3"]["player_data"].update_one({
-        #             "uuid": self.uuid,
-        #         }, {"$set": {humps.camelize(key): data}}, upsert=True)
-        #         if result.raw_result["ok"] != 1:
-        #             return False
-        #         return True
-        #
-        # self.main.thread_pool.submit(task)
 
     def get_data(self, shop_function: ShopFunction, key: str, default=None):
         if self.uuid not in Player.player_data_cache:

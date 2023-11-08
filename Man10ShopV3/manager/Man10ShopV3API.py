@@ -104,13 +104,15 @@ class Man10ShopV3API:
                     data = temp_queue[player_uuid]
 
                     # non data
+                    unsetting = {}
                     for key in list(data.keys()):
                         if data[key] is None:
-                            data[key] = {"$unset": True}
+                            unsetting[key] = ""
+                            del data[key]
 
                     self.main.mongo["man10shop_v3"]["player_data"].update_one({
                         "uuid": player_uuid,
-                    }, {"$set": data}, upsert=True)
+                    }, {"$set": data, "$unset": unsetting}, upsert=True)
                     del temp_queue[player_uuid]
 
             except Exception:

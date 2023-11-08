@@ -22,6 +22,10 @@ class PermissionFunction(ShopFunction):
 
         return self.set("users." + player.get_uuid_formatted(), default, update_db=update_db)
 
+    def get_users(self):
+        users = self.get("users")
+        return [users[key] for key in users]
+
     def remove_user(self, player: Player):
         permission_list = self.get("users")
         if player.get_uuid_formatted() in permission_list:
