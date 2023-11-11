@@ -42,6 +42,8 @@ class Man10ShopV3API:
         self.player_data_update_thread = Thread(target=self.player_data_update_thread)
         self.player_data_update_thread.start()
 
+        self.sign_cache = {}
+
     def shop_variable_update_thread(self):
         temp_queue = {}
         # schema of object
@@ -68,7 +70,8 @@ class Man10ShopV3API:
                     temp_queue[shop_id] = humps.camelize(temp_queue[shop_id])
                 for shop_id in list(temp_queue.keys()):
                     print("Pushed data to database: " + shop_id + " " + str(temp_queue[shop_id]))
-                    self.main.mongo["man10shop_v3"]["shops"].update_one({"shopId": shop_id}, {"$set": temp_queue[shop_id]})
+                    self.main.mongo["man10shop_v3"]["shops"].update_one({"shopId": shop_id},
+                                                                        {"$set": temp_queue[shop_id]})
                     del temp_queue[shop_id]
 
             except Exception:
@@ -117,12 +120,18 @@ class Man10ShopV3API:
 
             except Exception:
                 traceback.print_exc()
+
     def get_shop_id_from_location(self, sign: Sign):
+        if sign.location_id() in self.sign_cache:
+            return self.sign_cache.get(sign.location_id())
         query = {"sign.signs." + str(sign.location_id()): {"$exists": True}}
         query = self.main.mongo["man10shop_v3"]["shops"].find_one(query, {"_id": 0, "shopId": 1})
+        print("sign query:",query)
         if query is None:
+            self.sign_cache[sign.location_id()] = None
             return None
-        return query["shopId"]
+        self.sign_cache[sign.location_id()] = query["shopId"]
+        return self.sign_cache.get(sign.location_id())
 
     def get_shop(self, shop_id) -> Optional[Shop]:
         if shop_id in self.shops:
@@ -197,16 +206,19 @@ class Man10ShopV3API:
         #
         # return [x for x in result if x is not None]
 
-    def http_request(self, endpoint: str, path: str, method: str = "POST", payload: dict = None, return_json: bool = True):
+    def http_request(self, endpoint: str, path: str, method: str = "POST", payload: dict = None,
+                     return_json: bool = True):
         try:
             req = {}
             print("req endpoint", self.main.config["api"]["endpoint"].replace("{endpoint}", endpoint) + path)
             if method == "GET":
                 req = requests.get(self.main.config["api"]["endpoint"].replace("{endpoint}", endpoint) + path,
-                                   data=payload, headers={"Authorization": "Bearer " + self.main.config["api"]["key"]}, verify=False)
+                                   data=payload, headers={"Authorization": "Bearer " + self.main.config["api"]["key"]},
+                                   verify=False)
             if method == "POST":
                 req = requests.post(self.main.config["api"]["endpoint"].replace("{endpoint}", endpoint) + path,
-                                    data=payload, headers={"Authorization": "Bearer " + self.main.config["api"]["key"]}, verify=False)
+                                    data=payload, headers={"Authorization": "Bearer " + self.main.config["api"]["key"]},
+                                    verify=False)
 
             if req.status_code != 200:
                 return None
@@ -226,6 +238,7 @@ class Man10ShopV3API:
             }, False)
             # print("executing command", command, "in server", endpoint, "result", result)
             return result
+
         if not execute_async:
             return task()
         else:
@@ -263,4 +276,3 @@ class Man10ShopV3API:
         except Exception:
             traceback.print_exc()
             return False
-

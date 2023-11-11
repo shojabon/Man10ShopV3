@@ -43,10 +43,13 @@ class SignFunction(ShopFunction):
                 return
 
         sign = Sign().from_json(data["data"])
+
+        self.shop.api.sign_cache[sign.location_id()] = self.shop.get_shop_id()
         self.add_sign(sign)
         if "player" in data:
             player: Player = data["player"]
             player.success_message("看板を作成しました")
+
 
     def un_register_sign(self, data: dict):
         for key in data["data"].keys():
@@ -55,3 +58,5 @@ class SignFunction(ShopFunction):
 
         sign = Sign().from_json(data["data"])
         self.remove_sign(sign)
+        if sign.location_id() in self.shop.api.sign_cache:
+            del self.shop.api.sign_cache[sign.location_id()]
