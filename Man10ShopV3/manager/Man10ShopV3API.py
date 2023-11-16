@@ -168,43 +168,43 @@ class Man10ShopV3API:
 
     def get_player_shops(self, player: Player):
         try:
-            result = []
-            for shop_id in self.shops.keys():
-                shop = self.shops.get(shop_id)
-                if shop.permission_function.has_permission(player, "ACCOUNTANT"):
-                    result.append(shop)
-            return result
+            # result = []
+            # for shop_id in self.shops.keys():
+            #     shop = self.shops.get(shop_id)
+            #     if shop.permission_function.has_permission(player, "ACCOUNTANT"):
+            #         result.append(shop)
+            # return result
 
-            # query = {"permission.users." + player.uuid.replace("-", ""): {"$exists": True}}
-            # query = self.main.mongo["man10shop_v3"]["shops"].find(query, {"_id": 0, "shopId": 1})
-            # query = [self.get_shop(x["shopId"]) for x in query]
-            # return [x for x in query if x is not None]
+            query = {"permission.users." + player.uuid.replace("-", ""): {"$exists": True}}
+            query = self.main.mongo["man10shop_v3"]["shops"].find(query, {"_id": 0, "shopId": 1})
+            query = [self.get_shop(x["shopId"]) for x in query]
+            return [x for x in query if x is not None]
         except Exception:
             traceback.print_exc()
             return []
 
     def get_admin_shops(self):
-        result = []
-        for shop_id in self.shops.keys():
-            shop = self.shops.get(shop_id)
-            if shop.is_admin():
-                result.append(shop)
-        return result
-        # try:
-        #     query = {"admin": True}
-        #     query = self.main.mongo["man10shop_v3"]["shops"].find(query, {"_id": 0, "shopId": 1})
-        # except Exception:
-        #     traceback.print_exc()
-        #     return []
         # result = []
-        # for query_data in query:
-        #     try:
-        #         result.append(self.get_shop(query_data["shopId"]))
-        #     except Exception:
-        #         traceback.print_exc()
-        #         continue
-        #
-        # return [x for x in result if x is not None]
+        # for shop_id in self.shops.keys():
+        #     shop = self.shops.get(shop_id)
+        #     if shop.is_admin():
+        #         result.append(shop)
+        # return result
+        try:
+            query = {"admin": True}
+            query = self.main.mongo["man10shop_v3"]["shops"].find(query, {"_id": 0, "shopId": 1})
+        except Exception:
+            traceback.print_exc()
+            return []
+        result = []
+        for query_data in query:
+            try:
+                result.append(self.get_shop(query_data["shopId"]))
+            except Exception:
+                traceback.print_exc()
+                continue
+
+        return [x for x in result if x is not None]
 
     def http_request(self, endpoint: str, path: str, method: str = "POST", payload: dict = None,
                      return_json: bool = True):
