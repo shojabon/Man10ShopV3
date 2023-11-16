@@ -114,7 +114,7 @@ class Man10ShopV3API:
                             del data[key]
 
                     unset_query = {}
-                    if len(unset_query["$unset"]) != 0:
+                    if len(unsetting) != 0:
                         unset_query["$unset"] = unsetting
 
                     self.main.mongo["man10shop_v3"]["player_data"].update_one({
