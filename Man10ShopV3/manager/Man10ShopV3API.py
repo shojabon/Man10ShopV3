@@ -113,9 +113,13 @@ class Man10ShopV3API:
                             unsetting[key] = ""
                             del data[key]
 
+                    unset_query = {}
+                    if len(unset_query["$unset"]) != 0:
+                        unset_query["$unset"] = unsetting
+
                     self.main.mongo["man10shop_v3"]["player_data"].update_one({
                         "uuid": player_uuid,
-                    }, {"$set": data, "$unset": unsetting}, upsert=True)
+                    }, {"$set": data, **unset_query}, upsert=True)
                     del temp_queue[player_uuid]
 
             except Exception:
