@@ -44,7 +44,7 @@ class SignFunction(ShopFunction):
 
         sign = Sign().from_json(data["data"])
 
-        self.shop.api.sign_cache[sign.location_id()] = self.shop.get_shop_id()
+        # self.shop.api.sign_cache[sign.location_id()] = self.shop.get_shop_id()
         self.add_sign(sign)
         if "player" in data:
             player: Player = data["player"]
@@ -58,5 +58,5 @@ class SignFunction(ShopFunction):
 
         sign = Sign().from_json(data["data"])
         self.remove_sign(sign)
-        if sign.location_id() in self.shop.api.sign_cache:
-            del self.shop.api.sign_cache[sign.location_id()]
+        # if sign.location_id() in self.shop.api.sign_cache:
+        #     del self.shop.api.sign_cache[sign.location_id()]

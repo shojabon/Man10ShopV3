@@ -129,17 +129,24 @@ class Man10ShopV3API:
             except Exception:
                 traceback.print_exc()
 
+    # def get_shop_id_from_location(self, sign: Sign):
+    #     if sign.location_id() in self.sign_cache:
+    #         return self.sign_cache.get(sign.location_id())
+    #     query = {"sign.signs." + str(sign.location_id()): {"$exists": True}}
+    #     query = self.main.mongo["man10shop_v3"]["shops"].find_one(query, {"_id": 0, "shopId": 1})
+    #     print("sign query:",query)
+    #     if query is None:
+    #         self.sign_cache[sign.location_id()] = None
+    #         return None
+    #     self.sign_cache[sign.location_id()] = query["shopId"]
+    #     return self.sign_cache.get(sign.location_id())
+
     def get_shop_id_from_location(self, sign: Sign):
-        if sign.location_id() in self.sign_cache:
-            return self.sign_cache.get(sign.location_id())
         query = {"sign.signs." + str(sign.location_id()): {"$exists": True}}
         query = self.main.mongo["man10shop_v3"]["shops"].find_one(query, {"_id": 0, "shopId": 1})
-        print("sign query:",query)
         if query is None:
-            self.sign_cache[sign.location_id()] = None
             return None
-        self.sign_cache[sign.location_id()] = query["shopId"]
-        return self.sign_cache.get(sign.location_id())
+        return query["shopId"]
 
     def get_shop(self, shop_id) -> Optional[Shop]:
         if shop_id in self.shops:
