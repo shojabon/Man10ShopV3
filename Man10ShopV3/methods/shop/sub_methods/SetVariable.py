@@ -35,7 +35,7 @@ class SetVariable:
         @self.methods.main.app.post("/shop/variable/set")
         async def variable_set(request: SetVariableRequest, lang: Optional[str] = "jp"):
             try:
-                if type(request.value) is dict:
+                if type(request.value) is dict or type(request.value) is list:
                     request.value = humps.decamelize(request.value)
                 if request.player is not None:
                     request.player = humps.decamelize(request.player.dict())

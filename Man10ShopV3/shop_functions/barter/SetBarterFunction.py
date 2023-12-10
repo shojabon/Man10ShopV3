@@ -18,7 +18,6 @@ class SetBarterFunction(ShopFunction):
         return [ItemStack().from_json(x) if x is not None else None for x in self.get("required_items")]
 
     def get_result_items(self) -> List[ItemStack]:
-
         return [ItemStack().from_json(x) if x is not None else None for x in self.get("result_items")]
 
     # def is_function_enabled(self) -> bool:
@@ -33,6 +32,7 @@ class SetBarterFunction(ShopFunction):
             if required_item.type_base64 not in required_item_map:
                 required_item_map[required_item.type_base64] = 0
             required_item_map[required_item.type_base64] += required_item.amount
+
         for required_item in required_item_map.keys():
             if not order.player.item_check(required_item, required_item_map[required_item]).success():
                 order.player.warn_message("トレードのためのアイテムが不足してます")
