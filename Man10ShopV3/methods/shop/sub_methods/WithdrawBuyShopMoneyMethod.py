@@ -24,38 +24,50 @@ class WithdrawBuyShopMoneyMethod:
 
     def __init__(self, methods: ShopMethods):
         self.methods = methods
+        self.methods.main.man10_socket.custom_request.register_route("/shop/withdraw_buy_shop_money", self.socket_route)
 
         @self.methods.main.app.post("/shop/withdraw_buy_shop_money")
         async def withdraw_buy_shop_money(request: WithdrawBuyShopMoneyRequest, lang: Optional[str] = "jp"):
-            try:
+            return self.withdraw_buy_shop_money(request, lang)
 
-                request.player = humps.decamelize(request.player.dict())
+    def withdraw_buy_shop_money(self, request: WithdrawBuyShopMoneyRequest, lang: Optional[str] = "jp"):
+        try:
 
-                player = Player().load_from_json(request.player, self.methods.main)
-                shops = self.methods.main.api.get_player_shops(player)
+            request.player = humps.decamelize(request.player.dict())
 
-                results = []
-                for shop in shops:
-                    if shop.delete_function.is_deleted(): continue
-                    if shop.get_shop_type() != "BUY": continue
-                    permission = shop.permission_function.get_permission(player)
-                    if not shop.permission_function.has_permission_at_least("ACCOUNTANT", permission):
-                        continue
-                    results.append(shop)
+            player = Player().load_from_json(request.player, self.methods.main)
+            shops = self.methods.main.api.get_player_shops(player)
 
-                for shop in results:
-                    if shop.money_function.get_money() <= 0: continue
-                    self.methods.main.main_queue.put({
-                        "key": "money.withdraw",
-                        "shopId": shop.get_shop_id(),
-                        "data": {
-                            "amount": shop.money_function.get_money(),
-                        },
-                        "player": player.get_json(),
-                    })
+            results = []
+            for shop in shops:
+                if shop.delete_function.is_deleted(): continue
+                if shop.get_shop_type() != "BUY": continue
+                permission = shop.permission_function.get_permission(player)
+                if not shop.permission_function.has_permission_at_least("ACCOUNTANT", permission):
+                    continue
+                results.append(shop)
 
-                return self.methods.response_object("success")
-            except Exception as e:
-                traceback.print_exc()
-                return self.methods.response_object("error_internal", {"message": str(e)})
+            for shop in results:
+                if shop.money_function.get_money() <= 0: continue
+                self.methods.main.main_queue.put({
+                    "key": "money.withdraw",
+                    "shopId": shop.get_shop_id(),
+                    "data": {
+                        "amount": shop.money_function.get_money(),
+                    },
+                    "player": player.get_json(),
+                })
+
+            return self.methods.response_object("success")
+        except Exception as e:
+            traceback.print_exc()
+            return self.methods.response_object("error_internal", {"message": str(e)})
+    def socket_route(self, data: dict):
+        # convert dict to ShopInformationRequest
+        request_data = WithdrawBuyShopMoneyRequest(**data["data"])
+        result = self.withdraw_buy_shop_money(request_data)
+        result = json.loads(result.body)
+        return result["status"], result["data"]
+
+
 

@@ -19,6 +19,7 @@ from Man10ShopV3.data_class.OrderRequest import OrderRequest
 from Man10ShopV3.data_class.Player import Player
 from Man10ShopV3.manager.Man10ShopV3API import Man10ShopV3API
 from Man10ShopV3.methods.shop import ShopMethods
+from Man10Socket import Man10Socket
 
 
 class Man10ShopV3:
@@ -109,6 +110,8 @@ class Man10ShopV3:
         config_file = open("config/config.json", encoding="utf-8")
         self.config = json.loads(config_file.read())
         config_file.close()
+
+        self.man10_socket = Man10Socket("Man10ShopV3", self.config["man10socket"]["host"], self.config["man10socket"]["port"])
 
         self.mongo = MongoClient(self.config["mongodbConnectionString"])
         # print([x for x in self.mongo["man10shop_v3"]["shops"].find({})])

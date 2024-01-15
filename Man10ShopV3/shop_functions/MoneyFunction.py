@@ -71,7 +71,8 @@ class MoneyFunction(ShopFunction):
 
         if player_mode:
             result = player.give_money(data["data"]["amount"])
-            if result and player_mode:
+
+            if result.success() and player_mode:
                 player.success_message("出金に成功しました")
 
                 self.shop.api.create_system_log("money.withdraw", {

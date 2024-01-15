@@ -83,7 +83,7 @@ class ShopMethods:
         result = humps.camelize(result)
         return result, status_code
 
-    def response_object(self, response_id: str, data = None):
+    def response_object(self, response_id: str, data = None) -> JSONResponse:
         user_defined_language = "jp"
 
         result = self.convert_response_to_json_response(response_id, data, user_defined_language)

@@ -28,24 +28,35 @@ class CreateShopMethod:
 
     def __init__(self, methods: ShopMethods):
         self.methods = methods
+        self.methods.main.man10_socket.custom_request.register_route("/shop/create", self.socket_route)
 
         @self.methods.main.app.post("/shop/create")
         async def create_shop(request: CreateShopRequest, lang: Optional[str] = "jp"):
-            try:
-                request.player = humps.decamelize(request.player.dict())
+            return self.create_shop(request, lang)
 
-                if request.admin:
-                    if not self.methods.main.api.create_shop(None, "BUY", request.name, True):
-                        return self.methods.response_object("error_internal")
-                    return self.methods.response_object("success")
+    def create_shop(self, request: CreateShopRequest, lang: Optional[str] = "jp"):
+        try:
+            request.player = humps.decamelize(request.player.dict())
 
-                player = None
-                if request.player:
-                    player = Player().load_from_json(request.player, self.methods.main)
-
-                if not self.methods.main.api.create_shop(player, "BUY", request.name, False):
+            if request.admin:
+                if not self.methods.main.api.create_shop(None, "BUY", request.name, True):
                     return self.methods.response_object("error_internal")
                 return self.methods.response_object("success")
-            except Exception as e:
-                traceback.print_exc()
+
+            player = None
+            if request.player:
+                player = Player().load_from_json(request.player, self.methods.main)
+
+            if not self.methods.main.api.create_shop(player, "BUY", request.name, False):
                 return self.methods.response_object("error_internal")
+            return self.methods.response_object("success")
+        except Exception as e:
+            traceback.print_exc()
+            return self.methods.response_object("error_internal")
+
+    def socket_route(self, data: dict):
+        # convert dict to ShopInformationRequest
+        request_data = CreateShopRequest(**data["data"])
+        result = self.create_shop(request_data)
+        result = json.loads(result.body)
+        return result["status"], result["data"]

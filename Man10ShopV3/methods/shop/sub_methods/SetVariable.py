@@ -31,58 +31,68 @@ class SetVariable:
 
     def __init__(self, methods: ShopMethods):
         self.methods = methods
+        self.methods.main.man10_socket.custom_request.register_route("/shop/variable/set", self.socket_route)
 
         @self.methods.main.app.post("/shop/variable/set")
         async def variable_set(request: SetVariableRequest, lang: Optional[str] = "jp"):
-            try:
-                if type(request.value) is dict or type(request.value) is list:
-                    request.value = humps.decamelize(request.value)
-                if request.player is not None:
-                    request.player = humps.decamelize(request.player.dict())
+            return self.variable_set(request, lang)
 
-                owning_permission = "OWNER"
-                required_permission = "MODERATOR"
-                shop = self.methods.main.api.get_shop(request.shopId)
-                player = None
-                if shop is None:
-                    return self.methods.response_object("shop_invalid")
+    def socket_route(self, data: dict):
+        # convert dict to ShopInformationRequest
+        request_data = SetVariableRequest(**data["data"])
+        result = self.variable_set(request_data)
+        result = json.loads(result.body)
+        return result["status"], result["data"]
+    def variable_set(self, request: SetVariableRequest, lang: Optional[str] = "jp"):
+        try:
+            if type(request.value) is dict or type(request.value) is list:
+                request.value = humps.decamelize(request.value)
+            if request.player is not None:
+                request.player = humps.decamelize(request.player.dict())
 
-                request.key = humps.decamelize(request.key)
+            owning_permission = "OWNER"
+            required_permission = "MODERATOR"
+            shop = self.methods.main.api.get_shop(request.shopId)
+            player = None
+            if shop is None:
+                return self.methods.response_object("shop_invalid")
 
-                print("setVariable", request.player, request.key, request.value, type(request.value))
+            request.key = humps.decamelize(request.key)
 
-                if request.player:
-                    player = Player().load_from_json(request.player, self.methods.main)
-                    owning_permission = shop.permission_function.get_permission(player)
+            print("setVariable", request.player, request.key, request.value, type(request.value))
 
-                if request.key in shop.variable_permissions:
-                    required_permission = shop.variable_permissions[request.key]
+            if request.player:
+                player = Player().load_from_json(request.player, self.methods.main)
+                owning_permission = shop.permission_function.get_permission(player)
 
-                if not shop.is_admin() and not shop.permission_function.has_permission_at_least(required_permission, owning_permission):
-                    return self.methods.response_object("permission_insufficient")
-                if request.dataOfPlayer is not None:
-                    target_player = Player()
-                    target_player.uuid = request.dataOfPlayer
-                    target_player.main = self.methods.main
-                    target_player.raw_set_data(request.shopId + "." + request.key, request.value)
-                    self.methods.main.api.create_system_log("set_player_variable",
-                                                            {"shop_id": shop.get_shop_id(), "key": request.key,
-                                                             "value": request.value,
-                                                             "data_of_player": target_player.uuid,
-                                                             "player": player.get_json() if player is not None else None})
+            if request.key in shop.variable_permissions:
+                required_permission = shop.variable_permissions[request.key]
 
-                    return self.methods.response_object("success")
-
-                if not shop.set_variable(request.key, request.value, True, player=player):
-                    return self.methods.response_object("error_internal")
-
-                self.methods.main.api.create_system_log("set_variable", {"shop_id": shop.get_shop_id(), "key": request.key, "value": request.value, "player": player.get_json() if player is not None else None})
-                def update_signs():
-                    shop.sign_function.update_signs()
-
-                Thread(target=update_signs).start()
+            if not shop.is_admin() and not shop.permission_function.has_permission_at_least(required_permission, owning_permission):
+                return self.methods.response_object("permission_insufficient")
+            if request.dataOfPlayer is not None:
+                target_player = Player()
+                target_player.uuid = request.dataOfPlayer
+                target_player.main = self.methods.main
+                target_player.raw_set_data(request.shopId + "." + request.key, request.value)
+                self.methods.main.api.create_system_log("set_player_variable",
+                                                        {"shop_id": shop.get_shop_id(), "key": request.key,
+                                                         "value": request.value,
+                                                         "data_of_player": target_player.uuid,
+                                                         "player": player.get_json() if player is not None else None})
 
                 return self.methods.response_object("success")
-            except Exception as e:
-                traceback.print_exc()
-                return self.methods.response_object("error_internal", {"message": str(e)})
+
+            if not shop.set_variable(request.key, request.value, True, player=player):
+                return self.methods.response_object("error_internal")
+
+            self.methods.main.api.create_system_log("set_variable", {"shop_id": shop.get_shop_id(), "key": request.key, "value": request.value, "player": player.get_json() if player is not None else None})
+            def update_signs():
+                shop.sign_function.update_signs()
+
+            Thread(target=update_signs).start()
+
+            return self.methods.response_object("success")
+        except Exception as e:
+            traceback.print_exc()
+            return self.methods.response_object("error_internal", {"message": str(e)})

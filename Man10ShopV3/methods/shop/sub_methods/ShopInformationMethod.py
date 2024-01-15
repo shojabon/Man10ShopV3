@@ -27,41 +27,52 @@ class ShopInformationMethod:
 
     def __init__(self, methods: ShopMethods):
         self.methods = methods
+        self.methods.main.man10_socket.custom_request.register_route("/shop/info", self.socket_route)
 
         @self.methods.main.app.post("/shop/info")
         async def shop_information(request: ShopInformationRequest, lang: Optional[str] = "jp"):
-            try:
-                if request.player is not None:
-                    request.player = humps.decamelize(request.player.dict())
-                if request.sign is not None:
-                    request.sign = humps.decamelize(request.sign.dict())
+            return self.shop_information(request, lang)
 
-                shop_id = request.shopId
-                if request.sign:
-                    sign = Sign()
-                    sign.from_json(request.sign)
-                    shop_id = self.methods.main.api.get_shop_id_from_location(sign)
+    def shop_information(self, request: ShopInformationRequest, lang: Optional[str] = "jp"):
+        try:
+            if request.player is not None:
+                request.player = humps.decamelize(request.player.dict())
+            if request.sign is not None:
+                request.sign = humps.decamelize(request.sign.dict())
 
-                if shop_id is None:
-                    return self.methods.response_object("shop_invalid")
+            shop_id = request.shopId
+            if request.sign:
+                sign = Sign()
+                sign.from_json(request.sign)
+                shop_id = self.methods.main.api.get_shop_id_from_location(sign)
 
-                shop = self.methods.main.api.get_shop(shop_id)
-                if shop is None:
-                    return self.methods.response_object("shop_invalid")
+            if shop_id is None:
+                return self.methods.response_object("shop_invalid")
 
-                result = shop.get_export_data()
-                player = None
+            shop = self.methods.main.api.get_shop(shop_id)
+            if shop is None:
+                return self.methods.response_object("shop_invalid")
 
-                if request.player:
-                    player = Player().load_from_json(request.player, self.methods.main)
-                    result["playerPermission"] = shop.permission_function.get_permission(player)
+            result = shop.get_export_data()
+            player = None
 
-                menu_info = shop.get_menu_info(player)
-                result["menu_info"] = menu_info
-                result["menu_info"]["trade_item_count"] = shop.get_item_count(player)
+            if request.player:
+                player = Player().load_from_json(request.player, self.methods.main)
+                result["playerPermission"] = shop.permission_function.get_permission(player)
 
-                result["sign_info"] = shop.get_sign_info()
-                return self.methods.response_object("success", result)
-            except Exception as e:
-                traceback.print_exc()
-                return self.methods.response_object("error_internal", {"message": str(e)})
+            menu_info = shop.get_menu_info(player)
+            result["menu_info"] = menu_info
+            result["menu_info"]["trade_item_count"] = shop.get_item_count(player)
+
+            result["sign_info"] = shop.get_sign_info()
+            return self.methods.response_object("success", result)
+        except Exception as e:
+            traceback.print_exc()
+            return self.methods.response_object("error_internal", {"message": str(e)})
+
+    def socket_route(self, data: dict):
+        # convert dict to ShopInformationRequest
+        request_data = ShopInformationRequest(**data["data"])
+        result = self.shop_information(request_data)
+        result = json.loads(result.body)
+        return result["status"], result["data"]
