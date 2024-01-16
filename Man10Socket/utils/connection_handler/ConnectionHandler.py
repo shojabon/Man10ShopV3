@@ -61,9 +61,6 @@ class ConnectionHandler:
             finally:
                 server_socket.close()
 
-        self.server_thread = Thread(target=start_server)
-        self.server_thread.daemon = True
-        self.server_thread.start()
 
     def get_server_socket(self, socket_id) -> Connection:
         return self.sockets[socket_id]

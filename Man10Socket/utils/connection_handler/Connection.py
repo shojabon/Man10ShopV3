@@ -43,7 +43,7 @@ class Connection:
             while True:
                 try:
                     message = self.message_queue.get()
-                    # print("sent", message)
+                    # print("Sent message", message)
                     self.__send_message_internal(message)
                     self.message_queue.task_done()
                 except Exception as e:
@@ -53,11 +53,12 @@ class Connection:
         self.send_message_thread.daemon = True
         self.send_message_thread.start()
 
-        thread = Thread(target=self.receive_messages)
-        thread.daemon = True
-        thread.start()
+        self.client_thread = threading.Thread(target=self.receive_messages)
+        self.client_thread.daemon = True
+        self.client_thread.start()
 
     def register_socket_function(self, socket_function: ConnectionFunction):
+        socket_function.main = self.main
         self.functions[socket_function.function_type] = socket_function
 
     def __send_message_internal(self, message: dict):
@@ -65,7 +66,7 @@ class Connection:
         self.socket_object.sendall(message_string.encode('utf-8'))
 
     def send_message(self, message: dict, reply: bool = False, callback: Callable = None, reply_timeout: int = 1,
-                     reply_arguments: typing.Tuple = None) -> str | None:
+                     reply_arguments: typing.Tuple = None) -> dict | None:
         if reply or callback is not None:
             reply = True
             reply_id = str(uuid.uuid4())
@@ -106,14 +107,14 @@ class Connection:
         buffer = ""
         while True:
             try:
-                data = self.socket_object.recv(1024 * 10).decode('utf-8')
+                data = self.socket_object.recv(2 ** 25).decode('utf-8')
                 if data:
                     buffer += data
                     while "<E>" in buffer:
                         message, buffer = buffer.split("<E>", 1)
                         try:
                             json_message = json.loads(message)
-                            print("accepted message", json_message)
+                            # print("accepted message", json_message)
                             self.handle_message(json_message)
                         except Exception as e:
                             print("Error parsing message:", e)
