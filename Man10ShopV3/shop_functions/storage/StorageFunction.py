@@ -65,7 +65,7 @@ class StorageFunction(ShopFunction):
         if display_item_count < 0:
             display_item_count = 0
 
-        player.execute_command_in_server("mshop storageOpen " + self.shop.get_shop_id() + " " + player.uuid + " " + str(display_item_count))
+        player.execute_command_in_server("mshop storageOpen " + self.shop.get_shop_id() + " " + player.uuid + " " + str(display_item_count), s_command=False)
 
     def close_menu(self, data): #amount
         if "player" not in data: return
