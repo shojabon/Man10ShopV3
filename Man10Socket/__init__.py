@@ -47,7 +47,8 @@ class Man10Socket:
 
     def send_message(self, message: dict, reply: bool = False, callback: typing.Callable = None, reply_timeout: int = 1,
                      reply_arguments: typing.Tuple = None):
-        return self.connection_handler.get_socket("Man10Socket").send_message(message, reply, callback, reply_timeout, reply_arguments)
+        return self.connection_handler.get_socket("Man10Socket").send_message(message, reply, callback, reply_timeout,
+                                                                           reply_arguments)
 
     def set_session_name(self, session_name: str):
         self.session_name = session_name

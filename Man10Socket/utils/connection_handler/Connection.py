@@ -99,7 +99,7 @@ class Connection:
         if reply_id in self.reply_arguments: del self.reply_arguments[reply_id]
 
     def send_reply_message(self, status: str, message, reply_id: str):
-        self.send_message({"type": "reply", "replyId": reply_id, "message": message, "status": status})
+        self.send_message({"type": "reply", "replyId": reply_id, "data": message, "status": status})
 
     def receive_messages(self):
         buffer = ""

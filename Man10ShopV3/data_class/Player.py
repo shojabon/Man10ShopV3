@@ -89,13 +89,19 @@ class Player(object):
 
     # ======= minecraft functions ========
     def send_message(self, message):
-        def task():
-            return self.main.api.http_request(self.server, "/chat/tell", "POST", {
-                "message": message,
-                "playerUuid": self.uuid
-            })
-
-        self.main.thread_pool.submit(task)
+        self.main.man10_socket.send_message({
+            "type": "player_tell",
+            "player": self.uuid,
+            "message": message,
+            "target": self.server
+        })
+        # def task():
+        #     return self.main.api.http_request(self.server, "/chat/tell", "POST", {
+        #         "message": message,
+        #         "playerUuid": self.uuid
+        #     })
+        #
+        # self.main.thread_pool.submit(task)
 
         return True
 
