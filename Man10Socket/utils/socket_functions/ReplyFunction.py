@@ -8,6 +8,7 @@ from Man10Socket.utils.connection_handler.ConnectionFunction import ConnectionFu
 if TYPE_CHECKING:
     from Man10Socket.utils.connection_handler.Connection import Connection
 
+
 class ReplyFunction(ConnectionFunction):
     def information(self):
         self.name = "reply function"

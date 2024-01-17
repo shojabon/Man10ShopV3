@@ -6,6 +6,7 @@ import threading
 import traceback
 import typing
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 from queue import Queue
 from threading import Thread
 from typing import TYPE_CHECKING, Callable
@@ -20,7 +21,8 @@ if TYPE_CHECKING:
 
 class Connection:
 
-    def __init__(self, main: ConnectionHandler, socket_object: socket.socket, socket_id: str, mode: str = "server", name: str = None):
+    def __init__(self, main: ConnectionHandler, socket_object: socket.socket, socket_id: str, mode: str = "server",
+                 name: str = None):
         self.main = main
         self.socket_object = socket_object
         self.socket_id = socket_id
@@ -34,6 +36,8 @@ class Connection:
         self.reply_callback = ExpiringDict(5)
         self.reply_arguments = ExpiringDict(5)
 
+        self.executor: ThreadPoolExecutor = ThreadPoolExecutor(max_workers=20)
+
         self.message_queue = Queue()
 
         self.functions: dict[str, ConnectionFunction] = {}
@@ -43,7 +47,6 @@ class Connection:
             while True:
                 try:
                     message = self.message_queue.get()
-                    # print("Sent message", message)
                     self.__send_message_internal(message)
                     self.message_queue.task_done()
                 except Exception as e:
@@ -104,20 +107,29 @@ class Connection:
         self.send_message({"type": "reply", "replyId": reply_id, "data": message, "status": status})
 
     def receive_messages(self):
-        buffer = ""
+        buffer = b""
         while True:
             try:
-                data = self.socket_object.recv(2 ** 25).decode('utf-8')
+                data = self.socket_object.recv(2**10)
+                if not data:
+                    continue
                 if data:
                     buffer += data
-                    while "<E>" in buffer:
-                        message, buffer = buffer.split("<E>", 1)
+                    while b"<E>" in buffer:
+                        message, buffer = buffer.split(b"<E>", 1)
                         try:
-                            json_message = json.loads(message)
-                            # print("accepted message", json_message)
-                            self.handle_message(json_message)
+
+                            # print(json_message)
+                            def task(message_object):
+                                json_message = json.loads(message_object.decode('utf-8'))
+                                self.handle_message(json_message)
+
+                            self.executor.submit(task, message)
+
+                            # self.handle_message(json_message)
+
                         except Exception as e:
-                            print("Error parsing message:", e)
+                            print(message)
                             traceback.print_exc()
                 else:
                     break
@@ -137,8 +149,6 @@ class Connection:
                     self.main.same_name_sockets[name].remove(self.socket_id)
                     if len(self.main.same_name_sockets[name]) == 0:
                         del self.main.same_name_sockets[name]
-
-
 
             print("Socket closed", self.name)
         except Exception as e:

@@ -56,11 +56,12 @@ class ConnectionHandler:
                     client_socket, addr = server_socket.accept()
                     socket_id = str(uuid.uuid4())
                     self.sockets[socket_id] = Connection(self, client_socket, socket_id, "client")
-                    client_thread = threading.Thread(target=self.sockets[socket_id].receive_messages)
-                    client_thread.start()
             finally:
                 server_socket.close()
 
+        self.server_thread = Thread(target=start_server)
+        self.server_thread.daemon = True
+        self.server_thread.start()
 
     def get_server_socket(self, socket_id) -> Connection:
         return self.sockets[socket_id]
