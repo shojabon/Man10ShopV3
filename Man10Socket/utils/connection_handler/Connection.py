@@ -50,6 +50,7 @@ class Connection:
                     self.__send_message_internal(message)
                     self.message_queue.task_done()
                 except Exception as e:
+                    self.socket_close()
                     print(e)
 
         self.send_message_thread = Thread(target=send_message_thread)
