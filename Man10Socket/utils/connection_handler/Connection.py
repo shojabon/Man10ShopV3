@@ -52,6 +52,7 @@ class Connection:
                 except Exception as e:
                     self.socket_close()
                     print(e)
+                    break
 
         self.send_message_thread = Thread(target=send_message_thread)
         self.send_message_thread.daemon = True
