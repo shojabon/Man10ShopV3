@@ -17,9 +17,12 @@ from starlette.responses import JSONResponse
 
 from Man10ShopV3.data_class.OrderRequest import OrderRequest
 from Man10ShopV3.data_class.Player import Player
+from Man10ShopV3.manager.EventManager import EventManager
 from Man10ShopV3.manager.Man10ShopV3API import Man10ShopV3API
 from Man10ShopV3.methods.shop import ShopMethods
 from Man10Socket import Man10Socket
+from Man10Socket.utils.connection_handler.Connection import Connection
+from menu.action_menu.BuyAndSellActionMenu import BuyAndSellActionMenu
 
 
 class Man10ShopV3:
@@ -111,15 +114,15 @@ class Man10ShopV3:
         self.config = json.loads(config_file.read())
         config_file.close()
 
-        self.man10_socket = Man10Socket("Man10ShopV3", self.config["man10socket"]["host"], self.config["man10socket"]["port"])
+        self.man10_socket = Man10Socket("Man10ShopV3", hosts=self.config["man10socket"]["hosts"])
 
         self.mongo = MongoClient(self.config["mongodbConnectionString"])
         # print([x for x in self.mongo["man10shop_v3"]["shops"].find({})])
 
-        # load api
-
         self.api = Man10ShopV3API(self)
         self.api.load_all_shops()
+
+        self.event_manager = EventManager(self)
 
         self.shop_method = ShopMethods(self)
 

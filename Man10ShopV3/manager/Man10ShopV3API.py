@@ -247,7 +247,7 @@ class Man10ShopV3API:
 
     def execute_command_in_server(self, endpoint, command, execute_async: bool = False, s_command: bool = True):
         if self.main.config["communicationMode"] == "socket":
-            result = self.main.man10_socket.send_message({"type": "sCommand" if s_command else "command", "command": command, "target": endpoint}, reply=True)
+            result = self.main.man10_socket.send_message(endpoint, {"type": "sCommand" if s_command else "command", "command": command, "target": endpoint}, reply=True)
             if result is None:
                 return None
             return result.get("data")

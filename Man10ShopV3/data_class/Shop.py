@@ -40,6 +40,8 @@ from Man10ShopV3.shop_functions.tradeAmount.PerMinuteCoolDownFunction import Per
 from Man10ShopV3.shop_functions.tradeAmount.PerPlayerLimitUseFunction import PerPlayerLimitUseFunction
 from Man10ShopV3.shop_functions.tradeAmount.SingleTransactionModeFunction import SingleTransactionModeFunction
 from Man10ShopV3.shop_functions.tradeAmount.TotalPerMinuteCoolDownFunction import TotalPerMinuteCoolDownFunction
+from Man10Socket.utils.gui_manager.GUI import GUI
+from menu.action_menu.BuyAndSellActionMenu import BuyAndSellActionMenu
 from utils.JsonSchemaWrapper import merge_dictionaries
 from utils.JsonTools import flatten_dict, unflatten_dict
 
@@ -385,3 +387,8 @@ class Shop(object):
         }
         log_object = humps.camelize(log_object)
         self.api.main.mongo["man10shop_v3"]["trade_log"].insert_one(log_object)
+
+
+    def get_action_menu(self) -> GUI:
+        if self.get_shop_type() in ["BUY", "SELL"]:
+            return BuyAndSellActionMenu(self)

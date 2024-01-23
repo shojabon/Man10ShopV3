@@ -89,7 +89,7 @@ class Player(object):
 
     # ======= minecraft functions ========
     def send_message(self, message):
-        self.main.man10_socket.send_message({
+        self.main.man10_socket.send_message(self.server, {
             "type": "player_tell",
             "player": self.uuid,
             "message": message,
